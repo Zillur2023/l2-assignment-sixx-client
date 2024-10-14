@@ -25,7 +25,7 @@ export const adminRoutes = [
 
 export const userRoutes = [
   { name: "Home", path: "/" },
-  { name: "Post", path: "/post" },
+  { name: "Posts", path: "/posts" },
 ];
 
 export const publicRoutes = [

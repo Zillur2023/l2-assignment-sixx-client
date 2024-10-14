@@ -5,8 +5,8 @@ import Providers from "./lib/Providers";
 
 
 export const metadata: Metadata = {
-  title: "Apollo Gears",
-  description: "Next Level Riding Sharing Service",
+  title: "My App",
+  description: "Social medial app",
 };
 
 export default function RootLayout({

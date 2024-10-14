@@ -1,9 +1,14 @@
 import React from 'react'
+import CreatePost from '../components/post/CreatePost'
+import Posts from '../components/post/Posts'
 
-const Posts = () => {
+const PostsPage = () => {
   return (
-    <div>Posts</div>
+    <>
+      <CreatePost/>
+      <Posts/>
+    </>
   )
 }
 
-export default Posts
+export default PostsPage

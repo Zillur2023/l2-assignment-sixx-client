@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Footer from "./components/Footer";
-import NavBar from "./components/NavBar";
+import Footer from "./components/shared/Footer";
+import NavBar from "./components/shared/NavBar";
 
 
 export const metadata: Metadata = {
-  title: "Apollo Gears",
-  description: "Next Level Riding Sharing Service",
+  title: "My App",
+  description: "Social medial app",
 };
 
 export default function DashboardLayout({
