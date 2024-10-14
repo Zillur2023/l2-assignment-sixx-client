@@ -7,12 +7,16 @@ import { EyeInvisibleOutlined, EyeTwoTone } from "@ant-design/icons";
 import { jwtDecode } from "jwt-decode";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-
 import { useAppDispatch } from "../../redux/hooks";
-import { useLoginMutation } from "@/app/redux/features/auth/authApi";
-import { setUser } from "@/app/redux/features/auth/authSlice";
-// import { useLoginMutation } from "../../redux/features/auth/authApi";
+import { userRoutes } from "../components/NavBar";
+// import { setUser } from "@/app/redux/features/auth/authSlice";
+// import { useLoginMutation } from "@/app/redux/features/auth/authApi";
 // import { setUser } from "../../redux/features/auth/authSlice";
+import { useLoginMutation } from "../../redux/features/auth/authApi";
+// import { setUser } from "@/app/redux/features/auth/authSlice";
+import { setUser } from "../../redux/features/auth/authSlice";
+
+
 
 type FormValues = {
   email: string;
@@ -27,8 +31,8 @@ const LoginPage: React.FC = () => {
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
-      // email: "zillur@gmail.com",
-      // password: "1234",
+      email: "zillur@gmail.com",
+      password: "1234",
     },
   });
   // const navigate = useNavigate();
@@ -48,11 +52,14 @@ const LoginPage: React.FC = () => {
     if(res) {
      const { token } = res.data;
            const user:any = jwtDecode(token);
+           console.log('loginUser', user)
            dispatch(setUser({ user, token }));
           //  navigate(from, { replace: true });
           // {user.role === "admin"? router.push("/admin-dashboard"): router.push("/user-dashboard") }
-          if(user.role === "admin") {router.push("/admin-dashboard")}
-          if(user.role === "user") {router.push("/user-dashboard")}
+          // if(user.role === "admin") {router.push("/admin-dashboard")}
+          // if(user.role === "user") {router.push("/")}
+          // if(user.role === "user") {router.push(userRoutes?.[0]?.path)}
+          router.push("/")
      toast.success(res?.message, {id: toastId})
     }
     

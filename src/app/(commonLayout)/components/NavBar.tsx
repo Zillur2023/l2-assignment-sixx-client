@@ -13,31 +13,40 @@ import {
   DropdownItem,
   Avatar,
 } from "@nextui-org/react";
+import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
+import { RootState } from "@/app/redux/store";
+import { logout } from "@/app/redux/features/auth/authSlice";
+
+export const adminRoutes = [
+  { name: "Dashboard", path: "/dashboard" },
+  { name: "Home", path: "/" },
+  { name: "Post", path: "/post" },
+];
+
+export const userRoutes = [
+  { name: "Home", path: "/" },
+  { name: "Post", path: "/post" },
+];
+
+export const publicRoutes = [
+  { name: "Home", path: "/" },
+  { name: "Features", path: "/features" },
+  { name: "Register", path: "/register" },
+  { name: "Login", path: "/login" },
+];
+
+
 
 export default function NavBar() {
+  const { user } = useAppSelector((state: RootState) => state.auth);
+  console.log('navbarUser',user)
+  const routes = !user ? publicRoutes : user?.role === "admin" ? adminRoutes : userRoutes;
+  const dispatch = useAppDispatch()
   const pathname = usePathname(); // Get the current route's pathname
 //   const user = { role: "admin" }; 
-  const user = undefined;
+  // const user = undefined;
 
-  const adminRoutes = [
-    { name: "Dashboard", path: "/dashboard" },
-    { name: "Home", path: "/home" },
-    { name: "Post", path: "/post" },
-  ];
 
-  const userRoutes = [
-    { name: "Home", path: "/" },
-    { name: "Post", path: "/post" },
-  ];
-
-  const publicRoutes = [
-    { name: "Home", path: "/" },
-    { name: "Features", path: "/features" },
-    { name: "Register", path: "/register" },
-    { name: "Login", path: "/login" },
-  ];
-
-  const routes = !user ? publicRoutes : user?.role === "admin" ? adminRoutes : userRoutes;
 
   return (
     <Navbar>
@@ -57,12 +66,12 @@ export default function NavBar() {
       <NavbarContent justify="end">
         {!user ? (
           <>
-            <NavbarItem isActive={pathname === "/login"}>
+            {/* <NavbarItem isActive={pathname === "/login"}>
               <Link href="/login">Login</Link>
-            </NavbarItem>
+            </NavbarItem> */}
             <NavbarItem>
-              <Button as="a" href="/signup" color="primary" variant="flat">
-                Sign Up
+              <Button as="a" href="/login" color="primary" variant="flat">
+                Login
               </Button>
             </NavbarItem>
           </>
@@ -76,8 +85,8 @@ export default function NavBar() {
             </DropdownTrigger>
             <DropdownMenu aria-label="Static Actions">
               <DropdownItem key="profile"><Link href="/profile">Profile</Link></DropdownItem>
-              <DropdownItem key="logout" className="text-danger" color="danger">
-              <Link href="/logout">Logout</Link>
+              <DropdownItem  key="logout" className="text-danger" color="danger">
+              <Link onClick={() => dispatch(logout())} href="/">Logout</Link>
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
