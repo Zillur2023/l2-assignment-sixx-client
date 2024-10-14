@@ -4,12 +4,11 @@ import { useForm, SubmitHandler, Controller } from "react-hook-form";
 import { Input, Button, Upload, UploadFile, UploadProps } from "antd";
 import { EyeInvisibleOutlined, EyeTwoTone, UploadOutlined } from "@ant-design/icons";
 import { useRouter } from "next/navigation";
-// import { useCreateUserMutation } from "@/app/redux/features/user/userApi";
-import {useCreateUserMutation} from "../../redux/features/user/userApi"
 import { toast } from "sonner";
 import { RcFile } from "antd/es/upload";
-// import { useCreateUserMutation } from '../../redux/user/userApi';
-// import { toast } from 'sonner';
+// import {useCreateUserMutation} from "../../redux/features/user/userApi"
+import { useCreateUserMutation } from "@/app/redux/features/user/userApi";
+
 
 type FormValues = {
   name: string;

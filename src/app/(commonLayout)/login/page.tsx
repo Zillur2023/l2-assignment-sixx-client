@@ -9,8 +9,10 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { useAppDispatch } from "../../redux/hooks";
-import { useLoginMutation } from "../../redux/features/auth/authApi";
-import { setUser } from "../../redux/features/auth/authSlice";
+import { useLoginMutation } from "@/app/redux/features/auth/authApi";
+import { setUser } from "@/app/redux/features/auth/authSlice";
+// import { useLoginMutation } from "../../redux/features/auth/authApi";
+// import { setUser } from "../../redux/features/auth/authSlice";
 
 type FormValues = {
   email: string;

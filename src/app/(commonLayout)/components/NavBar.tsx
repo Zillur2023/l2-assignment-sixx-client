@@ -16,8 +16,8 @@ import {
 
 export default function NavBar() {
   const pathname = usePathname(); // Get the current route's pathname
-  const user = { role: "admin" }; 
-//   const user = undefined;
+//   const user = { role: "admin" }; 
+  const user = undefined;
 
   const adminRoutes = [
     { name: "Dashboard", path: "/dashboard" },
