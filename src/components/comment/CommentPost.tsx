@@ -5,10 +5,14 @@
 import Image from 'next/image'; // Import Next.js image component for optimization
 import { Button } from '@nextui-org/react'; // Import only NextUI Button
 import { ThumbsUp, ThumbsDown , MessageCircle, Share2 } from 'lucide-react'; // Import Lucide-react icons
-import { RootState } from '../../../redux/store';
-import { useGetUserQuery } from '../../../redux/features/user/userApi';
-import { useAppSelector } from "../../../redux/hooks";
-import { useUpdateDownvoteMutation, useUpdateUpvoteMutation } from '../../../redux/features/post/postApi';
+import { useAppSelector } from '@/redux/hooks';
+import { RootState } from '@/redux/store';
+import { useGetUserQuery } from '@/redux/features/user/userApi';
+import { useUpdateDownvoteMutation, useUpdateUpvoteMutation } from '@/redux/features/post/postApi';
+// import { RootState } from '../../../redux/store';
+// import { useGetUserQuery } from '../../../redux/features/user/userApi';
+// import { useAppSelector } from "../../../redux/hooks";
+// import { useUpdateDownvoteMutation, useUpdateUpvoteMutation } from '../../../redux/features/post/postApi';
 
 
 interface CommentPostProps {

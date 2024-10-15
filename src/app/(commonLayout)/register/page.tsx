@@ -6,8 +6,9 @@ import { EyeInvisibleOutlined, EyeTwoTone, UploadOutlined } from "@ant-design/ic
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { RcFile } from "antd/es/upload";
+import { useCreateUserMutation } from "@/redux/features/user/userApi";
 // import {useCreateUserMutation} from "../../redux/features/user/userApi"
-import { useCreateUserMutation } from "@/app/redux/features/user/userApi";
+// import { useCreateUserMutation } from "@/app/redux/features/user/userApi";
 
 
 type FormValues = {

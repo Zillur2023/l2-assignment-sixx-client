@@ -12,10 +12,16 @@ import {
   DropdownMenu,
   DropdownItem,
   Avatar,
+  NavbarMenu,
+  NavbarMenuItem,
+  NavbarMenuToggle,
 } from "@nextui-org/react";
-import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
-import { RootState } from "@/app/redux/store";
-import { logout } from "@/app/redux/features/auth/authSlice";
+import { useAppDispatch, useAppSelector } from "@/redux/hooks";
+import { RootState } from "@/redux/store";
+import { logout } from "@/redux/features/auth/authSlice";
+// import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
+// import { RootState } from "@/app/redux/store";
+// import { logout } from "@/app/redux/features/auth/authSlice";
 
 export const adminRoutes = [
   { name: "Dashboard", path: "/dashboard" },
@@ -25,11 +31,12 @@ export const adminRoutes = [
 
 export const userRoutes = [
   { name: "Home", path: "/" },
-  { name: "Posts", path: "/posts" },
+  { name: "Posts", path: "/user/posts" },
 ];
 
 export const publicRoutes = [
   { name: "Home", path: "/" },
+  { name: "Posts", path: "/posts" },
   { name: "Features", path: "/features" },
   { name: "Register", path: "/register" },
   { name: "Login", path: "/login" },
@@ -49,7 +56,10 @@ export default function NavBar() {
 
 
   return (
-    <Navbar>
+    <Navbar disableAnimation isBordered>
+      <NavbarContent className="sm:hidden" justify="start">
+        <NavbarMenuToggle />
+      </NavbarContent>
       <NavbarBrand>
         <p className="font-bold text-inherit">ACME</p>
       </NavbarBrand>
@@ -92,6 +102,16 @@ export default function NavBar() {
           </Dropdown>
         )}
       </NavbarContent>
+      <NavbarMenu>
+      {routes.map((route) => (
+            <NavbarMenuItem
+              key={route.path}
+              isActive={pathname === route.path} // Use pathname to check if the route is active
+            >
+              <Link href={route.path}>{route.name}</Link>
+            </NavbarMenuItem>
+          ))}
+      </NavbarMenu>
     </Navbar>
   );
 }

@@ -11,14 +11,19 @@ import {
 } from '@nextui-org/react';
 import { Controller, useForm } from 'react-hook-form';
 import { Avatar } from '@nextui-org/react';
-import { useAppSelector } from '../../../redux/hooks';
-import { RootState } from '../../../redux/store';
-import { useGetUserQuery } from '../../../redux/features/user/userApi';
-import { useCreateCommentMutation, useGetAllCommentQuery } from '../../../redux/features/comment/commentApi';
-import { useGetAllPostQuery } from '../../../redux/features/post/postApi';
+// import { useAppSelector } from '../../../redux/hooks';
+// import { RootState } from '../../../redux/store';
+// import { useGetUserQuery } from '../../../redux/features/user/userApi';
+// import { useCreateCommentMutation, useGetAllCommentQuery } from '../../../redux/features/comment/commentApi';
+// import { useGetAllPostQuery } from '../../../redux/features/post/postApi';
 
 import CommentPost from './CommentPost';
 import { X } from 'lucide-react'; // Import the X icon for the close button
+import { useAppSelector } from '@/redux/hooks';
+import { useGetUserQuery } from '@/redux/features/user/userApi';
+import { useGetAllPostQuery } from '@/redux/features/post/postApi';
+import { useCreateCommentMutation, useGetAllCommentQuery } from '@/redux/features/comment/commentApi';
+import { RootState } from '@/redux/store';
 
 interface CommentModalProps {
   postId: string;

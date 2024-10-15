@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 // import localFont from "next/font/local";
-import "./globals.css";
-import Providers from "./lib/Providers";
+// import "./globals.css";
+// import "@/src/styles/globals.css";
+import "@/styles/globals.css";
+import Providers from "@/lib/Providers";
+// import Providers from "./lib/Providers";
 
 
 export const metadata: Metadata = {
