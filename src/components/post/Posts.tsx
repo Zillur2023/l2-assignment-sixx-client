@@ -4,13 +4,15 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button, useDisclosure } from "@nextui-org/react";
-import { ThumbsUp, ThumbsDown, MessageCircle, Share2 } from "lucide-react";
+import { Button, Link, useDisclosure, User } from "@nextui-org/react";
+import { ThumbsUp, ThumbsDown, MessageCircle, Share2, VerifiedIcon } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
-import { useGetUserQuery } from "@/redux/features/user/userApi";
+import { useGetUserQuery, useUpdateFollowUnfollowMutation } from "@/redux/features/user/userApi";
 import { useGetAllPostQuery, useUpdateDownvoteMutation, useUpdateUpvoteMutation } from "@/redux/features/post/postApi";
 import CommentModal from "../comment/CommentModal";
+import { IPost } from "../constant";
+import UpdatePost from "./UpdatePost";
 // import CommentModal from "../comment/CommentModal";
 // import { RootState } from "../../../redux/store";
 // import { useGetUserQuery } from "../../../redux/features/user/userApi";
@@ -25,6 +27,7 @@ const Posts = () => {
   console.log({postsData})
   const [updateUpvote] = useUpdateUpvoteMutation();
   const [updateDownvote] = useUpdateDownvoteMutation();
+  const [updateFollowUnfollow] = useUpdateFollowUnfollowMutation()
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [postIdForComment, setPostIdForComment] = useState<string | null>(null);
 
@@ -46,6 +49,12 @@ const Posts = () => {
     onOpen();
   };
 
+  const  handleUpdateFollowUnfollow = async(id:string) => {
+   const res =  await updateFollowUnfollow({targetId:id, loginUserId: userData?.data?._id}).unwrap()
+   console.log(res)
+
+  }
+
   useEffect(() => {
     refetch();
   }, [refetch]);
@@ -56,57 +65,35 @@ const Posts = () => {
         <div key={post._id} className="bg-white shadow-md rounded-lg p-6 mb-6">
         <div className="flex items-center justify-between mb-4">
   {/* Author Info */}
-  <div className="flex items-center">
-    <div className="relative w-10 h-10 mr-4">
-      <Image
-        src={post?.author?.image || "/default-avatar.png"}
-        alt={`${post?.author?.name} profile`}
-        layout="fill"
-        objectFit="cover"
-        className="rounded-full"
-      />
-    </div>
-    <div>
-      <h3 className="font-semibold text-sm flex items-center">
-        {post?.author?.name}
-        {post?.author?.isVerified && (
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="blue"
-            className="w-4 h-4 ml-1"
-          >
-            <path
-              fillRule="evenodd"
-              d="M12 2C6.477 2 2 6.477 2 12c0 5.523 4.477 10 10 10s10-4.477 10-10c0-5.523-4.477-10-10-10zm4.707 8.707-5.5 5.5a1 1 0 0 1-1.414 0l-2.5-2.5a1 1 0 0 1 1.414-1.414l2.086 2.086 4.793-4.793a1 1 0 1 1 1.414 1.414z"
-              clipRule="evenodd"
-            />
-          </svg>
-        )}
-      </h3>
-      {/* Optionally, you can uncomment and format the date */}
-      {/* <p className="text-sm text-gray-500">{new Date(post.createdAt).toLocaleDateString()}</p> */}
-    </div>
-  </div>
-
+  <User   
+      name={(
+        <span className="flex items-center gap-3"> {post?.author?.name} {post?.author?.isVerified && <VerifiedIcon className="w-5 h-5 text-blue-500 " />} </span>
+      )}
+      description={(
+        // <Link href="https://twitter.com/jrgarciadev" size="sm" isExternal>
+        <Link href="" size="sm" isExternal>
+          {post?.author?.email}
+        </Link>
+      )}
+      avatarProps={{
+        // src: "https://avatars.githubusercontent.com/u/30373425?v=4"
+        src: `${post?.author?.image}`
+      }}
+    />
   {/* Follow/Unfollow Button */}
   <div>
-    {post?.author?.isFollowed ? (
-      <button
-        className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-1 px-3 rounded"
-        // onClick={() => handleUnfollow(post?.author?.id)}
-      >
-        Unfollow
-      </button>
-    ) : (
-      <button
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded"
-        // onClick={() => handleFollow(post?.author?.id)}
-      >
-        Follow
-      </button>
-    )}
-  </div>
+  {/* Only show the button if the logged-in user is not the post author */}
+  {post?.author?._id !== userData?.data?._id && (
+    <button
+      className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-1 px-3 rounded"
+      onClick={() => handleUpdateFollowUnfollow(post?.author?._id)}
+    >
+      {/* Check if the logged-in user is following the post's author */}
+      {userData?.data?.following?.includes(post?.author?._id) ? 'Unfollow' : 'Follow'}
+    </button>
+  )}
+  <UpdatePost updatePostData={post} />
+</div>
 </div>
 {post.image && (
             <div className="relative w-full h-64 mb-4">

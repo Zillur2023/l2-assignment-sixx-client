@@ -55,14 +55,15 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({ isOpen, onOpenC
       _id: userData?.data?._id,
     };
     formData.append("data", JSON.stringify(updateData));
+    const toastId = toast.loading("loading...")
 
     const result = await updateProfile(formData).unwrap();
     if (result.success) {
-      toast.success(result.message);
+      toast.success(result.message, {id: toastId});
       reset();
       onOpenChange(false);  // Close the modal on success
     } else {
-      toast.warning(result?.message);
+      toast.warning(result?.message, {id: toastId});
     }
   };
 

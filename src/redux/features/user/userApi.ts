@@ -40,6 +40,14 @@ const userApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    updateFollowUnfollow: builder.mutation({
+      query: (data) => ({
+        url: `user/update-follow-unfollow/${data.targetId}`,
+        method: "PUT",
+        body: {_id:data?.loginUserId},
+      }),
+      invalidatesTags: ["User"],
+    }),
     updateIsVerified: builder.mutation({
       query: (id) => ({
         url: `/user/isVerified/${id}`,
@@ -56,5 +64,6 @@ export const {
   useGetUserQuery,
   useGetUserByIdQuery,
   useUpdateProfileMutation,
+  useUpdateFollowUnfollowMutation,
   useUpdateIsVerifiedMutation
 } = userApi;
