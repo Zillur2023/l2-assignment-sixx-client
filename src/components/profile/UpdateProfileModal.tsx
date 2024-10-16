@@ -26,7 +26,7 @@ const UpdateProfileModal: React.FC<UpdateProfileModalProps> = ({ isOpen, onOpenC
   const [updateProfile] = useUpdateProfileMutation();
   const [fileList, setFileList] = useState<UploadFile[]>([]);
   
-  const { control, handleSubmit, reset, formState: { errors } } = useForm<FormValues>({
+  const { control, handleSubmit, reset } = useForm<FormValues>({
     defaultValues: {
       name: "",
       boi: "",

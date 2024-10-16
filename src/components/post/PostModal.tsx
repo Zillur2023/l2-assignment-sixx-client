@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client"
+"use client";
 import React, { useState, useEffect } from "react";
-import { Modal, Button, Upload, Form, Select } from "antd";
+import { Modal, Button, Upload, Form, Select, Input } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import ReactQuill from "react-quill";
@@ -9,9 +9,8 @@ import "react-quill/dist/quill.snow.css";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import { useGetUserQuery } from "@/redux/features/user/userApi";
-// import { useCreatePostMutation, useUpdatePostMutation } from "@/redux/features/post/postApi";
 import { useCreatePostMutation, useUpdatePostMutation } from "@/redux/features/post/postApi";
-import { RcFile, UploadFile, UploadProps } from "antd/es/upload";
+import { UploadFile, UploadProps } from "antd/es/upload";
 import { toast } from "sonner";
 
 const { Option } = Select;
@@ -23,6 +22,7 @@ interface CreatePostModalProps {
 }
 
 type FormValues = {
+  title: string;
   content: string;
   category: string;
   image?: UploadFile[];
@@ -35,14 +35,8 @@ const PostModal: React.FC<CreatePostModalProps> = ({
   onOpenChange,
   updatePostData, // Receive post data for updating
 }) => {
-  console.log("{updatePostData}---->POST MODAL", updatePostData)
-  console.log(typeof(updatePostData))
-  console.log("{updatePostData}---->POST MODAL ID", updatePostData?.content)
   const { user } = useAppSelector((state: RootState) => state.auth);
-  const { data: userData } = useGetUserQuery(user?.email, {
-    skip: !user?.email,
-  });
-  console.log({user})
+  const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
 
   const [createPost] = useCreatePostMutation();
   const [updatePost] = useUpdatePostMutation();
@@ -56,6 +50,7 @@ const PostModal: React.FC<CreatePostModalProps> = ({
     formState: { errors },
   } = useForm<FormValues>({
     defaultValues: {
+      title: updatePostData?.title || "",
       content: updatePostData?.content || "",
       category: updatePostData?.category || "",
       image: updatePostData?.image || [],
@@ -65,9 +60,9 @@ const PostModal: React.FC<CreatePostModalProps> = ({
   // Populate form when updating
   useEffect(() => {
     if (updatePostData) {
+      setValue("title", updatePostData?.title);
       setValue("content", updatePostData?.content);
       setValue("category", updatePostData?.category);
-      // setFileList(updatePostData.image || []);
     }
   }, [updatePostData, setValue]);
 
@@ -77,42 +72,30 @@ const PostModal: React.FC<CreatePostModalProps> = ({
     const plainText = tempElement.textContent || tempElement.innerText || "";
     const formData = new FormData();
 
-    let updatedData: any;
-
-    // Conditionally set updatedData based on updatePostData
-    if (updatePostData) {
-      updatedData = {
-        ...data,
-        updatePostData,
-        _id: updatePostData?._id,  // Include the id for update
-        author: userData?.data?._id,
-        content: plainText,
-      };
-    } else {
-      updatedData = {
-        ...data,
-        author: userData?.data?._id,  // No id for create
-        content: plainText,
-      };
-    }
-    console.log({updatedData})
+    const updatedData: any = {
+      ...data,
+      _id: updatePostData?._id, // Include the id for update
+      author: userData?.data?._id,
+      content: plainText,
+    };
 
     const imageFile = fileList[0]?.originFileObj as Blob;
-    formData.append("image", imageFile);
+    if (imageFile) formData.append("image", imageFile);
     formData.append("data", JSON.stringify(updatedData));
-    const toastId = toast.loading("loading...")
 
-    // Check if we're updating or creating
-    const result = updatePostData
-      ? await updatePost(formData).unwrap()
-      : await createPost(formData).unwrap();
+    const toastId = toast.loading("loading...");
+    try {
+      const result = updatePostData
+        ? await updatePost(formData).unwrap()
+        : await createPost(formData).unwrap();
 
-    if (result.success) {
-      toast.success(result.message, {id: toastId});
-      reset();
-      onOpenChange(false); // Close modal
-    } else {
-      toast.warning(result.message, {id: toastId});
+      if (result.success) {
+        toast.success(result.message, { id: toastId });
+        reset();
+        onOpenChange(false); // Close modal
+      }
+    } catch (error: any) {
+      toast.error(error?.data?.message, { id: toastId });
     }
   };
 
@@ -160,6 +143,22 @@ const PostModal: React.FC<CreatePostModalProps> = ({
       ]}
     >
       <Form layout="vertical">
+        {/* Title Field */}
+        <Form.Item
+          label="Title"
+          validateStatus={errors.title ? "error" : ""}
+          help={errors.title?.message}
+        >
+          <Controller
+            name="title"
+            control={control}
+            rules={{
+              required: !updatePostData ? "Title is required" : undefined,
+            }}
+            render={({ field }) => <Input {...field} placeholder="Post title" />}
+          />
+        </Form.Item>
+
         {/* Content with ReactQuill */}
         <Form.Item
           label="Content"
@@ -170,7 +169,7 @@ const PostModal: React.FC<CreatePostModalProps> = ({
             name="content"
             control={control}
             rules={{
-              required: "Content is required",
+              required: !updatePostData ? "Content is required" : undefined,
               validate: (value) => {
                 const tempElement = document.createElement("div");
                 tempElement.innerHTML = value;
@@ -196,7 +195,7 @@ const PostModal: React.FC<CreatePostModalProps> = ({
           <Controller
             name="category"
             control={control}
-            rules={{ required: "Category is required" }}
+            rules={{ required: !updatePostData ? "Category is required" : undefined }}
             render={({ field }) => (
               <Select {...field} placeholder="Select a category">
                 {categories.map((category) => (
@@ -218,7 +217,6 @@ const PostModal: React.FC<CreatePostModalProps> = ({
           <Controller
             name="image"
             control={control}
-            rules={{ required: "Image is required" }}
             render={({ field }) => (
               <Upload
                 {...uploadProps}

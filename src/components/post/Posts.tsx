@@ -5,14 +5,15 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { Button, Link, useDisclosure, User } from "@nextui-org/react";
-import { ThumbsUp, ThumbsDown, MessageCircle, Share2, VerifiedIcon } from "lucide-react";
+import { ThumbsUp, ThumbsDown, MessageCircle, Share2, VerifiedIcon, Trash2 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import { useGetUserQuery, useUpdateFollowUnfollowMutation } from "@/redux/features/user/userApi";
-import { useGetAllPostQuery, useUpdateDownvoteMutation, useUpdateUpvoteMutation } from "@/redux/features/post/postApi";
+import { useDeletePostMutation, useGetAllPostQuery, useUpdateDownvoteMutation, useUpdateUpvoteMutation } from "@/redux/features/post/postApi";
 import CommentModal from "../comment/CommentModal";
-import { IPost } from "../constant";
+// import { IPost } from "../constant";
 import UpdatePost from "./UpdatePost";
+import { toast } from "sonner";
 // import CommentModal from "../comment/CommentModal";
 // import { RootState } from "../../../redux/store";
 // import { useGetUserQuery } from "../../../redux/features/user/userApi";
@@ -28,6 +29,7 @@ const Posts = () => {
   const [updateUpvote] = useUpdateUpvoteMutation();
   const [updateDownvote] = useUpdateDownvoteMutation();
   const [updateFollowUnfollow] = useUpdateFollowUnfollowMutation()
+  const [deletePost] = useDeletePostMutation()
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [postIdForComment, setPostIdForComment] = useState<string | null>(null);
 
@@ -53,6 +55,19 @@ const Posts = () => {
    const res =  await updateFollowUnfollow({targetId:id, loginUserId: userData?.data?._id}).unwrap()
    console.log(res)
 
+  }
+
+  const handleDeletePost = async(postId:string) => {
+    const toastId = toast.loading("loading...")
+     try {
+      const res = await deletePost(postId).unwrap()
+
+     if(res){
+      toast.success(res?.message, {id: toastId})
+     }
+     } catch (error:any) {
+       toast.error(error?.data?.message, {id: toastId})
+     }
   }
 
   useEffect(() => {
@@ -82,8 +97,9 @@ const Posts = () => {
     />
   {/* Follow/Unfollow Button */}
   <div>
-  {/* Only show the button if the logged-in user is not the post author */}
-  {post?.author?._id !== userData?.data?._id && (
+ <div className="flex gap-2">
+   {/* Only show the button if the logged-in user is not the post author */}
+   {post?.author?._id !== userData?.data?._id && (
     <button
       className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-semibold py-1 px-3 rounded"
       onClick={() => handleUpdateFollowUnfollow(post?.author?._id)}
@@ -93,8 +109,11 @@ const Posts = () => {
     </button>
   )}
   <UpdatePost updatePostData={post} />
+  <Trash2 onClick={() => handleDeletePost(post?._id)} />
+ </div>
 </div>
 </div>
+<p className="mb-4 text-gray-700">{post.title}</p>
 {post.image && (
             <div className="relative w-full h-64 mb-4">
               <Image
