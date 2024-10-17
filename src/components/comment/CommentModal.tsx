@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Modal,
   ModalContent,
@@ -10,7 +10,8 @@ import {
   Button,
   User,
   Link,
-  Tooltip
+  Tooltip,
+  Spinner
 } from '@nextui-org/react';
 import { Controller, useForm } from 'react-hook-form';
 import { Avatar } from '@nextui-org/react';
@@ -44,25 +45,34 @@ const CommentModal: React.FC<CommentModalProps> = ({
 }) => {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
-  const { data: postsData, refetch } = useGetAllPostQuery(postId);
+  const { data: postsData, refetch } = useGetAllPostQuery({postId});
   const [deleteComment] = useDeleteCommentMutation()
   const { control, handleSubmit, reset, watch } = useForm();
   const [createComment] = useCreateCommentMutation();
   const { data: allCommentData } = useGetAllCommentQuery(postId);
+  const [commentLoading, setCommentLoading] = useState(false); // Loading state for the comment button
+
 
 
   const commentText = watch('commentText'); // Watch the comment input field
 
   const onSubmit = async (data: any) => {
+    setCommentLoading(true); // Set loading to true when submission starts
     const updatedData = {
       ...data,
       userId: userData?.data?._id,
       postId,
     };
-    await createComment(updatedData).unwrap();
-    reset();
-    refetch(); // Refetch the posts
-    postsRefetch();
+    try {
+      await createComment(updatedData).unwrap();
+      reset();
+      refetch(); // Refetch the posts
+      postsRefetch();
+    } catch (error:any) {
+      toast.error(error?.data?.message); // Show error if submission fails
+    } finally {
+      setCommentLoading(false); // Set loading to false after submission completes
+    }
   };
 
   const handleDeleteComment = async(commentId: string) => {
@@ -71,6 +81,8 @@ const CommentModal: React.FC<CommentModalProps> = ({
       const res = await deleteComment(commentId).unwrap()
 
     if(res) {
+      refetch(); // Refetch the posts
+      postsRefetch();
       toast.success(res?.message, {id: toastId})
     }
     } catch (error:any) {
@@ -164,11 +176,15 @@ const CommentModal: React.FC<CommentModalProps> = ({
             <Button
               // auto
               type="submit"
-              color={commentText ? 'primary' : 'default'} // Use default color when disabled
+              color={commentText ? 'secondary' : 'default'} // Use default color when disabled
               className={!commentText ? 'bg-gray-300' : ''} // Apply custom styling when disabled
               disabled={!commentText} // Disable if no comment text
             >
-              Comment
+              {commentLoading ? (
+                <Spinner /> // Show spinner when loading
+              ) : (
+                'Comment'
+              )}
             </Button>
           </form>
         </ModalFooter>

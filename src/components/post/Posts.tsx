@@ -1,10 +1,8 @@
-/* eslint-disable @typescript-eslint/ban-ts-comment */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-"use client";
-
+'use client'
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button, Link, useDisclosure, User } from "@nextui-org/react";
+import { Button, Link, useDisclosure, User, Spinner } from "@nextui-org/react"; // Import Spinner
 import { ThumbsUp, ThumbsDown, MessageCircle, Share2, VerifiedIcon, Trash2 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
@@ -14,12 +12,14 @@ import CommentModal from "../comment/CommentModal";
 import UpdatePost from "./UpdatePost";
 import { toast } from "sonner";
 import { Modal } from "antd";
+import { useRouter } from "next/navigation";
 
 const Posts = () => {
+  const router = useRouter()
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
-  const {data:IsAvailableForVerified, refetch:IsAvailableForVerifiedRefetch} = useIsAvailableForVeriedQuery(userData?.data?._id, {skip: !userData?.data?._id})
-  const { data: postsData, refetch:postsDataRefetch } = useGetAllPostQuery("");
+  const { data: IsAvailableForVerified, refetch: IsAvailableForVerifiedRefetch } = useIsAvailableForVeriedQuery(userData?.data?._id, { skip: !userData?.data?._id });
+  const { data: postsData, refetch: postsDataRefetch } = useGetAllPostQuery({});
   const [updateUpvote] = useUpdateUpvoteMutation();
   const [updateDownvote] = useUpdateDownvoteMutation();
   const [updateFollowUnfollow] = useUpdateFollowUnfollowMutation();
@@ -27,29 +27,63 @@ const Posts = () => {
   const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const [postIdForComment, setPostIdForComment] = useState<string | null>(null);
 
+  // Step 1: Create loading states
+  const [loadingUpvote, setLoadingUpvote] = useState<string | null>(null);
+  const [loadingDownvote, setLoadingDownvote] = useState<string | null>(null);
+  const [loadingFollow, setLoadingFollow] = useState<string | null>(null);
+
   const handleUpvote = async (postId: string) => {
+    if (!userData?.data?._id) {
+      router.push("/login");
+      return; // Prevent further execution
+    }
+    setLoadingUpvote(postId); // Set loading for this post
     const postData = { userId: userData?.data?._id, postId };
-    const upvote = await updateUpvote(postData).unwrap();
-    IsAvailableForVerifiedRefetch()
-    console.log({ upvote });
+    try {
+      await updateUpvote(postData).unwrap();
+      IsAvailableForVerifiedRefetch();
+    }catch(error:any) {
+      if(error) {
+        toast.error(error?.data?.message)
+      }
+    }
+     finally {
+      setLoadingUpvote(null); // Reset loading state
+    }
   };
 
   const handleDownvote = async (postId: string) => {
+    if (!userData?.data?._id) {
+      router.push("/login");
+      return; // Prevent further execution
+    }
+    setLoadingDownvote(postId); // Set loading for this post
     const postData = { userId: userData?.data?._id, postId };
-    const downvote = await updateDownvote(postData).unwrap();
-    console.log({ downvote });
-  };
-
-  const handleCommentClick = (postId: string) => {
-    postsDataRefetch();
-    setPostIdForComment(postId);
-    onOpen();
+    try {
+      await updateDownvote(postData).unwrap();
+    }catch(error:any) {
+      if(error) {
+        toast.error(error?.data?.message)
+      }
+    } finally {
+      setLoadingDownvote(null); // Reset loading state
+    }
   };
 
   const handleUpdateFollowUnfollow = async (id: string) => {
-    const res = await updateFollowUnfollow({ targetId: id, loginUserId: userData?.data?._id }).unwrap();
-    console.log(res);
+    if (!userData?.data?._id) {
+      router.push("/login");
+      return; // Prevent further execution
+    }
+    setLoadingFollow(id); // Set loading for this user
+    try {
+      const res = await updateFollowUnfollow({ targetId: id, loginUserId: userData?.data?._id }).unwrap();
+      console.log(res);
+    } finally {
+      setLoadingFollow(null); // Reset loading state
+    }
   };
+
   const handleDelete = async (postId: string) => {
     const toastId = toast.loading("loading...");
     try {
@@ -64,12 +98,22 @@ const Posts = () => {
 
   const handleDeleteClick = (postId: string) => {
     Modal.confirm({
-      title: "Are you sure you want to delete this post",
+      title: "Are you sure you want to delete this post?",
       okText: "Yes",
       okType: "danger",
       cancelText: "No",
       onOk: () => handleDelete(postId),
     });
+  };
+
+  const handleCommentClick = (postId: string) => {
+    if (!userData?.data?._id) {
+      router.push("/login");
+      return; // Prevent further execution
+    }
+    postsDataRefetch();
+    setPostIdForComment(postId);
+    onOpen();
   };
 
   useEffect(() => {
@@ -100,15 +144,18 @@ const Posts = () => {
             />
             <div className="flex items-center gap-3">
               {post?.author?._id !== userData?.data?._id && (
-                <button
-                  className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded"
+                <Button
+                  // className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-1 px-3 rounded"
                   onClick={() => handleUpdateFollowUnfollow(post?.author?._id)}
+                  disabled={loadingFollow === post?.author?._id} // Disable button if loading
                 >
-                  {userData?.data?.following?.includes(post?.author?._id) ? "Unfollow" : "Follow"}
-                </button>
+                  {loadingFollow === post?.author?._id ? (
+                    <Spinner size="sm" /> // Show spinner when loading
+                  ) : userData?.data?.following?.includes(post?.author?._id) ? "Unfollow" : "Follow"}
+                </Button>
               )}
-              {post?.author?._id == userData?.data?._id && <UpdatePost updatePostData={post} />}
-              {post?.author?._id == userData?.data?._id &&  <Trash2 onClick={() => handleDeleteClick(post?._id)} className="text-red-500 cursor-pointer" />}
+              {post?.author?._id === userData?.data?._id && <UpdatePost updatePostData={post} />}
+              {post?.author?._id === userData?.data?._id && <Trash2 onClick={() => handleDeleteClick(post?._id)} className="text-red-500 cursor-pointer" />}
             </div>
           </div>
 
@@ -138,17 +185,31 @@ const Posts = () => {
                 size="sm"
                 onClick={() => handleUpvote(post._id)}
                 className="flex items-center space-x-2"
+                disabled={loadingUpvote === post._id} // Disable button if loading
               >
-                <ThumbsUp size={18} />
-                <span>{post.upvotes.length}</span>
+                {loadingUpvote === post._id ? (
+                  <Spinner size="sm" /> // Show spinner when loading
+                ) : (
+                  <>
+                    <ThumbsUp size={18} />
+                    <span>{post.upvotes.length}</span>
+                  </>
+                )}
               </Button>
               <Button
                 size="sm"
                 onClick={() => handleDownvote(post._id)}
                 className="flex items-center space-x-2"
+                disabled={loadingDownvote === post._id} // Disable button if loading
               >
-                <ThumbsDown size={18} />
-                <span>{post.downvotes.length}</span>
+                {loadingDownvote === post._id ? (
+                  <Spinner size="sm" /> // Show spinner when loading
+                ) : (
+                  <>
+                    <ThumbsDown size={18} />
+                    <span>{post.downvotes.length}</span>
+                  </>
+                )}
               </Button>
             </div>
 
@@ -161,10 +222,7 @@ const Posts = () => {
                 <MessageCircle size={18} />
                 <span>{post.comments?.length}</span>
               </Button>
-              <Button
-                size="sm"
-                className="flex items-center space-x-2"
-              >
+              <Button size="sm" className="flex items-center space-x-2">
                 <Share2 size={18} />
                 <span>{post.shares}</span>
               </Button>
@@ -172,16 +230,15 @@ const Posts = () => {
           </div>
         </div>
       ))}
-
-      {postIdForComment && (
+        {postIdForComment && (
         <CommentModal
           postId={postIdForComment}
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          postsRefetch={refetch}
+          postsRefetch={postsDataRefetch}
         />
-      )}
-    </div>
+      )}  
+</div>
   );
 };
 

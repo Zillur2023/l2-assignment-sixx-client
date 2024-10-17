@@ -18,8 +18,9 @@ import {
 } from "@nextui-org/react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
-import { logout } from "@/redux/features/auth/authSlice";
+import { logoutFromRedux } from "@/redux/features/auth/authSlice";
 import { useGetUserQuery } from "@/redux/features/user/userApi";
+import { logoutFromLocalStore } from "@/services/AuthSerivce";
 // import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
 // import { RootState } from "@/app/redux/store";
 // import { logout } from "@/app/redux/features/auth/authSlice";
@@ -43,8 +44,6 @@ export const publicRoutes = [
   { label: "Login", href: "/login" },
 ];
 
-
-
 export default function NavBar() {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
@@ -55,7 +54,10 @@ export default function NavBar() {
 //   const user = { role: "admin" }; 
   // const user = undefined;
 
-
+  const handleLogout  = () => {
+    dispatch(logoutFromRedux())
+    logoutFromLocalStore()
+  }
 
   return (
     <Navbar disableAnimation isBordered>
@@ -98,7 +100,7 @@ export default function NavBar() {
             <DropdownMenu aria-label="Static Actions">
               <DropdownItem key="profile"><Link href="/profile">Profile</Link></DropdownItem>
               <DropdownItem  key="logout" className="text-danger" color="danger">
-              <Link onClick={() => dispatch(logout())} href="/">Logout</Link>
+              <Link onClick={() =>handleLogout()} href="/" >Logout</Link>
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>

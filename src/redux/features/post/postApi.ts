@@ -11,10 +11,21 @@ export const postApi = baseApi.injectEndpoints({
       invalidatesTags: ["Post"],
     }),
     getAllPost: builder.query({
-      query: (id?: string) => ({
-        url: id ? `/post/all-post/${id}` : "/post/all-post",
-        method: "GET",
-      }),
+      query: ({ postId, userId }: { postId?: string; userId?: string }) => {
+        let url = '/post/all-post'; // Base URL
+        if (postId) {
+          // If postId is provided, append it to the URL
+          url += `/${postId}`;
+        } else if (userId) {
+          // If userId is provided, append it to the URL
+          url += `/userId/${userId}`;
+        }
+    
+        return {
+          url,
+          method: "GET",
+        };
+      },
       providesTags: ["Post"],
     }),
     updateUpvote: builder.mutation({

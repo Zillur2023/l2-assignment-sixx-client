@@ -27,7 +27,7 @@ const authSlice = createSlice({
       state.user = user;
       state.token = token;
     },
-    logout: (state) => {
+    logoutFromRedux: (state) => {
       state.user = null;
       state.token = null;
     },
@@ -35,6 +35,6 @@ const authSlice = createSlice({
   },
 });
 
-export const { setUser, logout } = authSlice.actions;
+export const { setUser, logoutFromRedux } = authSlice.actions;
 
 export default authSlice.reducer;
