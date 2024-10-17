@@ -1,15 +1,19 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import { Button } from "@nextui-org/button";
-import Link from "next/link";
+
 import Image from "next/image";
 import { SidebarOptions } from "./SidebarOptions";
 import { adminLinks, userLinks } from "./constant";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
-import { useGetUserQuery } from "@/redux/features/user/userApi";
+import { useGetUserQuery, useUpdateVerifiedMutation } from "@/redux/features/user/userApi";
 import CreatePost from "@/components/post/CreatePost";
 import UpdateProfile from "@/components/profile/UpdateProfile";
 import { VerifiedIcon } from "lucide-react";
+import { Button } from "@nextui-org/react";
+import { toast } from "sonner";
+import { useIsAvailableForVeriedQuery } from "@/redux/features/post/postApi";
+import { useEffect } from "react";
 
 // import { SidebarOptions } from "./SidebarOptions";
 // import { adminLinks, userLinks } from "./constants";
@@ -19,10 +23,40 @@ import { VerifiedIcon } from "lucide-react";
 const Sidebar = () => {
   // const { user } = useUser();
   const { user } = useAppSelector((state: RootState) => state.auth);
-  const { data: userData } = useGetUserQuery(user?.email, {
-    skip: !user?.email,
-  });
+  const { data: userData } = useGetUserQuery(user?.email, {skip: !user?.email});
+  const {data:IsAvailableForVerified, refetch} = useIsAvailableForVeriedQuery(userData?.data?._id, {skip: !userData?.data?._id})
+  const [updateVerified] = useUpdateVerifiedMutation()
+  console.log({userData})
+  console.log({IsAvailableForVerified})
 
+  const handleUpdateVerified = async(id:string) => {
+   const toastId = toast.loading('loading...')
+   
+   try {
+    const res = await updateVerified(id).unwrap()
+   
+   if(res) {
+    const paymentUrl = res?.data?.paymentSession?.payment_url;
+window.location.href = paymentUrl;
+    toast.success(res?.message, {id: toastId})
+   }
+   } catch (error:any) {
+    toast.error(error?.data?.message, {id: toastId})
+   }
+
+  }
+
+  // const handleIsAvailableForVerified = () => {
+  //   refetch()
+  // }
+
+  useEffect(() => {
+    if (userData?.data?._id) {
+      refetch();
+    }
+  }, [userData?.data?._id, refetch]);
+  
+ 
   return (
     <div>
      <div className="rounded-xl bg-default-100 p-2">
@@ -46,8 +80,13 @@ const Sidebar = () => {
           <VerifiedIcon className="w-5 h-5 text-blue-500" />
       )}
     </div>
+    <div className="flex items-center justify-between">
     <p className="break-words text-sm">{userData?.data?.email}</p>
-    <p className="break-words text-sm">{userData?.data?.bio}</p>
+{ IsAvailableForVerified?.data?.length > 0 && <Button onClick={() => handleUpdateVerified(userData?.data?._id)}>Payment for verify</Button> } 
+    </div>
+    {/* {userData?.data?.upvotes?.length > 0 && <Button onClick={() => handleUpdateVerified(userData?.data?._id)}>Payment for verify</Button> }  */}
+    
+    {/* <p className="break-words text-sm">{userData?.data?.bio}</p> */}
   </div>
 
   {/* Followers and Following Info */}

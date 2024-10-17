@@ -7,7 +7,10 @@ import {
   ModalBody,
   ModalFooter,
   Input,
-  Button
+  Button,
+  User,
+  Link,
+  Tooltip
 } from '@nextui-org/react';
 import { Controller, useForm } from 'react-hook-form';
 import { Avatar } from '@nextui-org/react';
@@ -18,12 +21,13 @@ import { Avatar } from '@nextui-org/react';
 // import { useGetAllPostQuery } from '../../../redux/features/post/postApi';
 
 import CommentPost from './CommentPost';
-import { X } from 'lucide-react'; // Import the X icon for the close button
+import { Trash2, VerifiedIcon, X } from 'lucide-react'; // Import the X icon for the close button
 import { useAppSelector } from '@/redux/hooks';
 import { useGetUserQuery } from '@/redux/features/user/userApi';
 import { useGetAllPostQuery } from '@/redux/features/post/postApi';
-import { useCreateCommentMutation, useGetAllCommentQuery } from '@/redux/features/comment/commentApi';
+import { useCreateCommentMutation, useDeleteCommentMutation, useGetAllCommentQuery } from '@/redux/features/comment/commentApi';
 import { RootState } from '@/redux/store';
+import { toast } from 'sonner';
 
 interface CommentModalProps {
   postId: string;
@@ -41,6 +45,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
   const { data: postsData, refetch } = useGetAllPostQuery(postId);
+  const [deleteComment] = useDeleteCommentMutation()
   const { control, handleSubmit, reset, watch } = useForm();
   const [createComment] = useCreateCommentMutation();
   const { data: allCommentData } = useGetAllCommentQuery(postId);
@@ -60,6 +65,19 @@ const CommentModal: React.FC<CommentModalProps> = ({
     postsRefetch();
   };
 
+  const handleDeleteComment = async(commentId: string) => {
+    const toastId = toast.loading('loading...')
+    try {
+      const res = await deleteComment(commentId).unwrap()
+
+    if(res) {
+      toast.success(res?.message, {id: toastId})
+    }
+    } catch (error:any) {
+      toast.error(error?.data?.message, {id: toastId})
+    }
+  }
+
   return (
     <Modal
       isOpen={isOpen}
@@ -70,8 +88,22 @@ const CommentModal: React.FC<CommentModalProps> = ({
     
           <ModalHeader className="sticky top-0 bg-white z-10 p-4 shadow-md">
           <div className="flex items-center space-x-3">
-            <Avatar src={userData?.data?.avatar} alt="User Avatar" />
-            <p>{userData?.data?.name}</p>
+          <User
+              name={
+                <span className="flex items-center gap-3 text-lg font-semibold">
+                  {postsData?.data?.[0]?.author?.name}{" "}
+                  {postsData?.data?.[0]?.author?.isVerified && <VerifiedIcon className="w-5 h-5 text-blue-500 " />}
+                </span>
+              }
+              description={
+                <Link href="" size="sm" isExternal>
+                  {postsData?.data?.[0]?.author?.email}
+                </Link>
+              }
+              avatarProps={{
+                src: `${postsData?.data?.[0]?.author?.image}`,
+              }}
+            />
           </div>
             {/* Close Icon */}
             <div
@@ -91,12 +123,19 @@ const CommentModal: React.FC<CommentModalProps> = ({
 
           {/* Comments Section */}
           <div className="space-y-4">
-            {allCommentData?.data?.map((item:any) => (
-              <div key={item?._id} className="flex items-start space-x-2">
-                <Avatar src="/path/to/commenter-avatar.jpg" alt="Commenter" />
+            {allCommentData?.data?.map((comment:any) => (
+              <div key={comment?._id} className="flex items-start space-x-2">
+                <Tooltip content={comment?.userId?.email}>
+                <Avatar src={comment?.userId?.image} alt="Commenter" />
+                </Tooltip>
                 <div className="bg-gray-100 p-2 rounded-lg">
-                  <p><strong>{item?.userId?.name}</strong></p>
-                  <p>{item?.commentText}</p>
+                 <div className='flex gap-3 '>
+                 <p><strong>{comment?.userId?.name}</strong></p>
+                 <Trash2 onClick={() => handleDeleteComment(comment?._id)} className="text-red-500 cursor-pointer size-4" />
+                 </div>
+                  {/* {comment?.author?._id == userData?.data?._id &&  <Trash2 onClick={() => handleDeleteComment(comment?._id)} className="text-red-500 cursor-pointer" />} */}
+
+                  <p>{comment?.commentText}</p>
                 </div>
               </div>
             ))}

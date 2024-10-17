@@ -48,6 +48,13 @@ export const postApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Post"],
     }),
+    isAvailableForVeried: builder.query({
+      query: (id) => ({
+        url: `/post/isAvailable-verified/${id}`,
+        method: "GET",
+      }),
+      providesTags: ["Post"],
+    }),
   }),
 });
 
@@ -57,5 +64,6 @@ export const {
   useUpdateUpvoteMutation,
   useUpdateDownvoteMutation,
   useUpdatePostMutation,
-  useDeletePostMutation
+  useDeletePostMutation,
+  useIsAvailableForVeriedQuery
 } = postApi;

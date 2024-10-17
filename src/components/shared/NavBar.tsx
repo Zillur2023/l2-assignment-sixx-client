@@ -19,32 +19,35 @@ import {
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import { logout } from "@/redux/features/auth/authSlice";
+import { useGetUserQuery } from "@/redux/features/user/userApi";
 // import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
 // import { RootState } from "@/app/redux/store";
 // import { logout } from "@/app/redux/features/auth/authSlice";
+// { href: "/profile", label: "Profile" },
 
 export const adminRoutes = [
-  { name: "Dashboard", path: "/dashboard" },
-  { name: "Home", path: "/" },
-  { name: "Post", path: "/post" },
+  { label: "Dashboard", href: "/dashboard" },
+  { label: "Home", href: "/" },
+  { label: "Post", href: "/post" },
 ];
 
 export const userRoutes = [
-  { name: "profile", path: "/profile" },
+  { label: "profile", href: "/profile" },
 ];
 
 export const publicRoutes = [
-  { name: "Home", path: "/" },
-  { name: "Posts", path: "/posts" },
-  { name: "Features", path: "/features" },
-  { name: "Register", path: "/register" },
-  { name: "Login", path: "/login" },
+  { label: "Home", href: "/" },
+  { label: "Posts", href: "/posts" },
+  { label: "Features", href: "/features" },
+  { label: "Register", href: "/register" },
+  { label: "Login", href: "/login" },
 ];
 
 
 
 export default function NavBar() {
   const { user } = useAppSelector((state: RootState) => state.auth);
+  const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
   console.log('navbarUser',user)
   const routes = !user ? publicRoutes : user?.role === "admin" ? adminRoutes : userRoutes;
   const dispatch = useAppDispatch()
@@ -65,10 +68,10 @@ export default function NavBar() {
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
         {routes.map((route) => (
           <NavbarItem
-            key={route.path}
-            isActive={pathname === route.path} // Use pathname to check if the route is active
+            key={route.href}
+            isActive={pathname === route.href} // Use pathname to check if the route is active
           >
-            <Link href={route.path}>{route.name}</Link>
+            <Link href={route.href}>{route.label}</Link>
           </NavbarItem>
         ))}
       </NavbarContent>
@@ -88,7 +91,7 @@ export default function NavBar() {
             <Dropdown>
             <DropdownTrigger>
             <div className="flex gap-3 items-center">
-      <Avatar src="https://i.pravatar.cc/150?u=a042581f4e29026024d" />
+      <Avatar src={userData?.data?.image} />
      
     </div>
             </DropdownTrigger>
@@ -104,10 +107,10 @@ export default function NavBar() {
       <NavbarMenu>
       {routes.map((route) => (
             <NavbarMenuItem
-              key={route.path}
-              isActive={pathname === route.path} // Use pathname to check if the route is active
+              key={route.href}
+              isActive={pathname === route.href} // Use pathname to check if the route is active
             >
-              <Link href={route.path}>{route.name}</Link>
+              <Link href={route.href}>{route.label}</Link>
             </NavbarMenuItem>
           ))}
       </NavbarMenu>

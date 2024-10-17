@@ -1,5 +1,6 @@
 import Container from "@/components/UI/Container";
-import Sidebar from "@/components/UI/Sidebar";
+import Sidebar from "@/components/UI/Sidebar/Sidebar";
+// import Sidebar from "@/components/UI/Sidebar/Sidebar";
 import { ReactNode } from "react";
 
 // import Container from "@/src/components/UI/Container";
