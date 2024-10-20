@@ -10,6 +10,8 @@ const baseQuery = fetchBaseQuery({
   // baseUrl: `${config.server_url}/api`,
   baseUrl: `http://localhost:5000/api/v1`,
   // baseUrl: `https://l2-assignment-six-server.vercel.app/api/v1`,
+  
+  
   credentials: "include",
   prepareHeaders: (headers, { getState }) => {
     const token = (getState() as RootState).auth.token;

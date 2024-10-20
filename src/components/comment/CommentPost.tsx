@@ -9,6 +9,8 @@ import { RootState } from '@/redux/store';
 import { useGetUserQuery } from '@/redux/features/user/userApi';
 import { useUpdateDownvoteMutation, useUpdateUpvoteMutation } from '@/redux/features/post/postApi';
 import { useState } from 'react';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 
 interface CommentPostProps {
@@ -16,7 +18,7 @@ interface CommentPostProps {
 }
 
 const CommentPost = ({ postsData }: CommentPostProps) => {
-  console.log("{postsData} --commentPost",postsData)
+  const router = useRouter()
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
   const [loadingUpvote, setLoadingUpvote] = useState<string | null>(null);
@@ -29,20 +31,37 @@ const CommentPost = ({ postsData }: CommentPostProps) => {
 
 
   const handleUpvote = async (postId: string) => {
+    if (!userData?.data?._id) {
+      router.push("/login");
+      return; // Prevent further execution
+    }
     setLoadingUpvote(postId); // Set loading for this post
     const postData = { userId: userData?.data?._id, postId };
     try {
       await updateUpvote(postData).unwrap();
-    } finally {
+    }catch(error:any) {
+      if(error) {
+        toast.error(error?.data?.message)
+      }
+    }
+     finally {
       setLoadingUpvote(null); // Reset loading state
     }
   };
 
   const handleDownvote = async (postId: string) => {
+    if (!userData?.data?._id) {
+      router.push("/login");
+      return; // Prevent further execution
+    }
     setLoadingDownvote(postId); // Set loading for this post
     const postData = { userId: userData?.data?._id, postId };
     try {
       await updateDownvote(postData).unwrap();
+    }catch(error:any) {
+      if(error) {
+        toast.error(error?.data?.message)
+      }
     } finally {
       setLoadingDownvote(null); // Reset loading state
     }

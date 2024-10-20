@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
 import { usePathname } from "next/navigation";
 import {
@@ -15,16 +16,15 @@ import {
   NavbarMenu,
   NavbarMenuItem,
   NavbarMenuToggle,
+  Spinner,
 } from "@nextui-org/react";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
 import { logoutFromRedux } from "@/redux/features/auth/authSlice";
 import { useGetUserQuery } from "@/redux/features/user/userApi";
-import { logoutFromLocalStore } from "@/services/AuthSerivce";
-// import { useAppDispatch, useAppSelector } from "@/app/redux/hooks";
-// import { RootState } from "@/app/redux/store";
-// import { logout } from "@/app/redux/features/auth/authSlice";
-// { href: "/profile", label: "Profile" },
+import { getUser, logoutFromLocalStore } from "@/services/AuthSerivce";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export const adminRoutes = [
   { label: "Dashboard", href: "/dashboard" },
@@ -39,24 +39,46 @@ export const userRoutes = [
 export const publicRoutes = [
   { label: "Home", href: "/" },
   { label: "Posts", href: "/posts" },
-  { label: "Features", href: "/features" },
   { label: "Register", href: "/register" },
   { label: "Login", href: "/login" },
 ];
 
-export default function NavBar() {
+// export default function  NavBar() {
+const NavBar = () => {
   const { user } = useAppSelector((state: RootState) => state.auth);
+  // const user = await getUser()
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
   console.log('navbarUser',user)
-  const routes = !user ? publicRoutes : user?.role === "admin" ? adminRoutes : userRoutes;
+  const routes = user === null ? publicRoutes : user?.role === "admin" ? adminRoutes : userRoutes;
   const dispatch = useAppDispatch()
   const pathname = usePathname(); // Get the current route's pathname
+  const [isLoadingLogout, setIsLoadingLogout] = useState(false)
+  console.log({isLoadingLogout})
 //   const user = { role: "admin" }; 
   // const user = undefined;
 
-  const handleLogout  = () => {
+  const logout = async() => {
     dispatch(logoutFromRedux())
-    logoutFromLocalStore()
+    await logoutFromLocalStore();
+  }
+  
+
+  const handleLogout  = async() => {
+   
+    setIsLoadingLogout(true)
+    try {
+      // Force the cookie deletion and proceed only if successful
+      dispatch(logoutFromRedux());
+      await logoutFromLocalStore();
+      logout()
+      // Dispatch the Redux logout action
+    } catch (error) {
+      toast.error("Error logout try again");
+      // Handle any potential errors during logout
+    } finally {
+      setIsLoadingLogout(false);
+    }
+
   }
 
   return (
@@ -99,8 +121,13 @@ export default function NavBar() {
             </DropdownTrigger>
             <DropdownMenu aria-label="Static Actions">
               <DropdownItem key="profile"><Link href="/profile">Profile</Link></DropdownItem>
+           
               <DropdownItem  key="logout" className="text-danger" color="danger">
-              <Link onClick={() =>handleLogout()} href="/" >Logout</Link>
+              { isLoadingLogout === true  ?
+            <Spinner size="sm" /> :
+            <Link onClick={() =>handleLogout()} href="/" >Logout</Link>
+            }
+              {/* <Link onClick={() =>handleLogout()} href="/" >Logout</Link> */}
               </DropdownItem>
             </DropdownMenu>
           </Dropdown>
@@ -119,3 +146,5 @@ export default function NavBar() {
     </Navbar>
   );
 }
+
+export default NavBar;

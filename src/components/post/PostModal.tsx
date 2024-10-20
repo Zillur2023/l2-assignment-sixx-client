@@ -12,6 +12,7 @@ import { useGetUserQuery } from "@/redux/features/user/userApi";
 import { useCreatePostMutation, useUpdatePostMutation } from "@/redux/features/post/postApi";
 import { UploadFile, UploadProps } from "antd/es/upload";
 import { toast } from "sonner";
+import { allCategoryName } from "./constant";
 
 const { Option } = Select;
 
@@ -28,13 +29,12 @@ type FormValues = {
   image?: UploadFile[];
 };
 
-const categories = ["Adventure", "Business Travel", "Exploration"];
-
 const PostModal: React.FC<CreatePostModalProps> = ({
   isOpen,
   onOpenChange,
   updatePostData, // Receive post data for updating
 }) => {
+  console.log("updatePostDataFrom  --PostModal", updatePostData)
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
 
@@ -198,7 +198,7 @@ const PostModal: React.FC<CreatePostModalProps> = ({
             rules={{ required: !updatePostData ? "Category is required" : undefined }}
             render={({ field }) => (
               <Select {...field} placeholder="Select a category">
-                {categories.map((category) => (
+                {allCategoryName.map((category) => (
                   <Option key={category} value={category}>
                     {category}
                   </Option>

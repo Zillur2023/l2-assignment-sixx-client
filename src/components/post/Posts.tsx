@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Button, Link, useDisclosure, User, Spinner } from "@nextui-org/react"; // Import Spinner
+import { Button, Link, useDisclosure, User, Spinner, Tooltip, Select, SelectItem } from "@nextui-org/react"; // Import Spinner
 import { ThumbsUp, ThumbsDown, MessageCircle, Share2, VerifiedIcon, Trash2 } from "lucide-react";
 import { useAppSelector } from "@/redux/hooks";
 import { RootState } from "@/redux/store";
@@ -13,13 +14,19 @@ import UpdatePost from "./UpdatePost";
 import { toast } from "sonner";
 import { Modal } from "antd";
 import { useRouter } from "next/navigation";
+import { allCategoryName } from "./constant";
 
 const Posts = () => {
   const router = useRouter()
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
+  const [searchTerm, setSearchTerm] = useState<string>('');
+  const [category, setCategory] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes">("highestUpvotes");
   const { data: IsAvailableForVerified, refetch: IsAvailableForVerifiedRefetch } = useIsAvailableForVeriedQuery(userData?.data?._id, { skip: !userData?.data?._id });
-  const { data: postsData, refetch: postsDataRefetch } = useGetAllPostQuery({});
+  const { data: postsData, refetch: postsDataRefetch } = useGetAllPostQuery({searchTerm, category: category || undefined, sortBy});
+  console.log("{postsData}" ,postsData?.data?.[0]?.upvotes?.name)
+  console.log("{postsData}" ,postsData)
   const [updateUpvote] = useUpdateUpvoteMutation();
   const [updateDownvote] = useUpdateDownvoteMutation();
   const [updateFollowUnfollow] = useUpdateFollowUnfollowMutation();
@@ -118,10 +125,39 @@ const Posts = () => {
 
   useEffect(() => {
     postsDataRefetch();
-  }, [postsDataRefetch]);
+  }, [category, searchTerm, sortBy]);
 
   return (
     <div className="mt-6 space-y-6 max-w-full sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px] mx-auto">
+      <input 
+  type="text" 
+  placeholder="Search..." 
+  value={searchTerm} 
+  onChange={(e) => setSearchTerm(e.target.value)} 
+  className="border rounded p-2 mb-4"
+/>
+<select 
+  value={sortBy} 
+  onChange={(e) => setSortBy(e.target.value as "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes")} 
+  className="border rounded p-2 mb-4"
+>
+  <option value="">Sort</option>
+  <option value="highestUpvotes">Highest Upvotes</option>
+  <option value="lowestUpvotes">Lowest Upvotes</option>
+  <option value="highestDownvotes">Highest Downvotes</option>
+  <option value="lowestDownvotes">Lowest Downvotes</option>
+</select>
+<select 
+        value={category || ''} 
+        onChange={(e) => setCategory(e.target.value)} 
+        className="border rounded p-2 mb-4"
+      >
+        <option value="">All Categories</option> 
+        {allCategoryName.map((cat) => (
+          <option key={cat} value={cat}>{cat}</option>
+        ))}
+      </select>
+     
       {postsData?.data?.map((post: any) => (
         <div key={post._id} className="bg-white shadow-lg rounded-lg p-6">
           {/* Author Info */}
@@ -181,7 +217,10 @@ const Posts = () => {
           {/* Post Interactions */}
           <div className="flex justify-between items-center text-gray-500">
             <div className="flex items-center space-x-3">
-              <Button
+             {/* <Tooltip content={post?.upvotes?.[index+1]?.name}> */}
+             <Tooltip content={<div className="whitespace-pre-wrap">{post?.upvotes.map((upvote: any) => upvote?.name).join('\n')}</div>} placement="bottom">
+             {/* <Tooltip content={<div className="whitespace-pre-wrap">{post?.upvotes.name}</div>} placement="bottom"> */}
+             <Button
                 size="sm"
                 onClick={() => handleUpvote(post._id)}
                 className="flex items-center space-x-2"
@@ -196,6 +235,9 @@ const Posts = () => {
                   </>
                 )}
               </Button>
+             </Tooltip>
+             <Tooltip content={<div className="whitespace-pre-wrap">{post?.downvotes.map((downvote: any) => downvote?.name).join('\n')}</div>} placement="bottom">
+
               <Button
                 size="sm"
                 onClick={() => handleDownvote(post._id)}
@@ -211,9 +253,11 @@ const Posts = () => {
                   </>
                 )}
               </Button>
+               </Tooltip>
             </div>
 
             <div className="flex items-center space-x-3">
+
               <Button
                 size="sm"
                 onClick={() => handleCommentClick(post._id)}
@@ -226,7 +270,7 @@ const Posts = () => {
                 <Share2 size={18} />
                 <span>{post.shares}</span>
               </Button>
-            </div>
+            </div> 
           </div>
         </div>
       ))}

@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
 import { NextRequest } from "next/server";
-import { jwtDecode } from "jwt-decode";
-import { cookies } from "next/headers";
+import { getUser } from "./services/AuthSerivce";
 
 const AuthRoutes = ["/login", "/register"];
 
@@ -16,21 +15,8 @@ const roleBasedRoutes = {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  const zillur = cookies()
-  console.log({zillur})
-
-  const accessToken = cookies().get("accessToken")?.value;
-
-  console.log({accessToken})
-
-   //Role based authorization
-
-   let user = null;
-
-  if(accessToken) {
-    user = await jwtDecode(accessToken)
-  }
-
+  const user = await getUser()
+  // console.log('middleWare --User',user)
 
   if (!user) {
     if (AuthRoutes.includes(pathname)) {
@@ -57,5 +43,5 @@ export async function middleware(request: NextRequest) {
 
 // See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/profile", "/profile/:page*", "/admin", "/login", "/register"],
+  matcher: ["/profile", "/profile/:page*", "/admin", "/admin/:page", "/login", "/register"],
 };

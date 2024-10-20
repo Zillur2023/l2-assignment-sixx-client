@@ -11,15 +11,49 @@ export const postApi = baseApi.injectEndpoints({
       invalidatesTags: ["Post"],
     }),
     getAllPost: builder.query({
-      query: ({ postId, userId }: { postId?: string; userId?: string }) => {
+      query: ({
+        postId,
+        userId,
+        searchTerm, // Include searchTerm from parameters
+        category,   // Include category from parameters
+        sortBy,     // Include sortBy from parameters
+      }: {
+        postId?: string;
+        userId?: string;
+        searchTerm?: string; // Optional searchTerm
+        category?: string;   // Optional category
+        sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes" // Optional sortBy
+      }) => {
         let url = '/post/all-post'; // Base URL
+        console.log('zillurPOstId',postId)
+        console.log({url})
+    
+        // Append postId and userId as path parameters
         if (postId) {
-          // If postId is provided, append it to the URL
           url += `/${postId}`;
-        } else if (userId) {
-          // If userId is provided, append it to the URL
-          url += `/userId/${userId}`;
         }
+        
+        if (userId) {
+          url += `/${userId}`;
+        }
+    
+        // Append searchTerm and sortBy as query parameters
+        const params: string[] = [];
+        if (searchTerm) {
+          params.push(`searchTerm=${encodeURIComponent(searchTerm)}`);
+        }
+        if (category) {
+          params.push(`category=${encodeURIComponent(category)}`); // Append category
+        }
+        if (sortBy) {
+          params.push(`sortBy=${sortBy}`);
+        }
+        
+        // If there are any query parameters, append them to the URL
+        if (params.length) {
+          url += `?${params.join('&')}`;
+        }
+        
     
         return {
           url,
@@ -28,6 +62,7 @@ export const postApi = baseApi.injectEndpoints({
       },
       providesTags: ["Post"],
     }),
+    
     updateUpvote: builder.mutation({
       query: (postData) => ({
         url: `/post/upvotes`,
@@ -78,3 +113,23 @@ export const {
   useDeletePostMutation,
   useIsAvailableForVeriedQuery
 } = postApi;
+
+
+// getAllPost: builder.query({
+//   query: ({ postId, userId }: { postId?: string; userId?: string }) => {
+//     let url = '/post/all-post'; // Base URL
+//     if (postId) {
+//       // If postId is provided, append it to the URL
+//       url += `/${postId}`;
+//     } else if (userId) {
+//       // If userId is provided, append it to the URL
+//       url += `/userId/${userId}`;
+//     }
+
+//     return {
+//       url,
+//       method: "GET",
+//     };
+//   },
+//   providesTags: ["Post"],
+// }),
