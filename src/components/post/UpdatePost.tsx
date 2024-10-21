@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "antd";
 import PostModal from "./PostModal";
-import { IPost } from "../constant";
+import { IPost } from "../type";
 
 // Define the props type including updatePostData
 interface UpdatePostProps {
@@ -10,7 +10,6 @@ interface UpdatePostProps {
 }
 
 const UpdatePost: React.FC<UpdatePostProps> = ({ updatePostData }) => {
-    console.log("{updatePostData}--> updatePost", updatePostData)
   const [isOpen, setIsOpen] = useState(false);
 
   return (

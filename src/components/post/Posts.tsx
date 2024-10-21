@@ -25,8 +25,7 @@ const Posts = () => {
   const [sortBy, setSortBy] = useState<"highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes">("highestUpvotes");
   const { data: IsAvailableForVerified, refetch: IsAvailableForVerifiedRefetch } = useIsAvailableForVeriedQuery(userData?.data?._id, { skip: !userData?.data?._id });
   const { data: postsData, refetch: postsDataRefetch } = useGetAllPostQuery({searchTerm, category: category || undefined, sortBy});
-  console.log("{postsData}" ,postsData?.data?.[0]?.upvotes?.name)
-  console.log("{postsData}" ,postsData)
+  console.log({postsData})
   const [updateUpvote] = useUpdateUpvoteMutation();
   const [updateDownvote] = useUpdateDownvoteMutation();
   const [updateFollowUnfollow] = useUpdateFollowUnfollowMutation();
@@ -85,7 +84,6 @@ const Posts = () => {
     setLoadingFollow(id); // Set loading for this user
     try {
       const res = await updateFollowUnfollow({ targetId: id, loginUserId: userData?.data?._id }).unwrap();
-      console.log(res);
     } finally {
       setLoadingFollow(null); // Reset loading state
     }
@@ -125,7 +123,7 @@ const Posts = () => {
 
   useEffect(() => {
     postsDataRefetch();
-  }, [category, searchTerm, sortBy]);
+  }, [postsDataRefetch,category, searchTerm, sortBy]);
 
   return (
     <div className="mt-6 space-y-6 max-w-full sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px] mx-auto">
@@ -287,3 +285,5 @@ const Posts = () => {
 };
 
 export default Posts;
+
+

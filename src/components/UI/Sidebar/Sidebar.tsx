@@ -28,9 +28,8 @@ const Sidebar = () => {
     useIsAvailableForVeriedQuery(userData?.data?._id, {
       skip: !userData?.data?._id,
     });
+
   const [updateVerified] = useUpdateVerifiedMutation();
-  console.log({ userData });
-  console.log({ IsAvailableForVerified });
 
   const handleUpdateVerified = async (id: string) => {
     const toastId = toast.loading("loading...");

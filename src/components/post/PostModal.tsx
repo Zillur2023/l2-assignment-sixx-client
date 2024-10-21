@@ -34,7 +34,6 @@ const PostModal: React.FC<CreatePostModalProps> = ({
   onOpenChange,
   updatePostData, // Receive post data for updating
 }) => {
-  console.log("updatePostDataFrom  --PostModal", updatePostData)
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
 

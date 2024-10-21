@@ -25,8 +25,6 @@ export const postApi = baseApi.injectEndpoints({
         sortBy?: "highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes" // Optional sortBy
       }) => {
         let url = '/post/all-post'; // Base URL
-        console.log('zillurPOstId',postId)
-        console.log({url})
     
         // Append postId and userId as path parameters
         if (postId) {

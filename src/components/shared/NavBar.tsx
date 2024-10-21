@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client"
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Navbar,
   NavbarBrand,
@@ -27,33 +27,35 @@ import { useState } from "react";
 import { toast } from "sonner";
 
 export const adminRoutes = [
-  { label: "Dashboard", href: "/dashboard" },
-  { label: "Home", href: "/" },
-  { label: "Post", href: "/post" },
+  { href: "/admin/user-management", label: "User management" },
+  { href: "/admin/post-management", label: "Post management" },
+  { href: "/admin/news-feed", label: "News feed" },
+  { href: "/admin/about-us", label: "About us" },
+  { href: "/admin/contact-us", label: "Contact us" },
 ];
 
 export const userRoutes = [
-  { label: "profile", href: "/profile" },
+  { href: "/profile/news-feed", label: "News feed" },
+  { href: "/profile/about-us", label: "About us" },
+  { href: "/profile/contact-us", label: "Contact us" },
 ];
 
 export const publicRoutes = [
-  { label: "Home", href: "/" },
-  { label: "Posts", href: "/posts" },
-  { label: "Register", href: "/register" },
-  { label: "Login", href: "/login" },
+  {href: "/", label: "News Feed" },
+  { href: "/register", label: "Register" },
+  {href: "/login", label: "Login" },
 ];
 
 // export default function  NavBar() {
 const NavBar = () => {
+  const router = useRouter()
   const { user } = useAppSelector((state: RootState) => state.auth);
   // const user = await getUser()
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
-  console.log('navbarUser',user)
   const routes = user === null ? publicRoutes : user?.role === "admin" ? adminRoutes : userRoutes;
   const dispatch = useAppDispatch()
   const pathname = usePathname(); // Get the current route's pathname
   const [isLoadingLogout, setIsLoadingLogout] = useState(false)
-  console.log({isLoadingLogout})
 //   const user = { role: "admin" }; 
   // const user = undefined;
 
@@ -68,9 +70,10 @@ const NavBar = () => {
     setIsLoadingLogout(true)
     try {
       // Force the cookie deletion and proceed only if successful
+      logout()
       dispatch(logoutFromRedux());
       await logoutFromLocalStore();
-      logout()
+      router.push("/")
       // Dispatch the Redux logout action
     } catch (error) {
       toast.error("Error logout try again");
@@ -125,7 +128,8 @@ const NavBar = () => {
               <DropdownItem  key="logout" className="text-danger" color="danger">
               { isLoadingLogout === true  ?
             <Spinner size="sm" /> :
-            <Link onClick={() =>handleLogout()} href="/" >Logout</Link>
+            // <Link onClick={() =>handleLogout()} href="/" >Logout</Link>
+            <div onClick={handleLogout}>Logout</div>
             }
               {/* <Link onClick={() =>handleLogout()} href="/" >Logout</Link> */}
               </DropdownItem>

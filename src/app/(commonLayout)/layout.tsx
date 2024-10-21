@@ -1,4 +1,4 @@
-import Footer from "@/components/shared/Footer";
+// import Footer from "@/components/shared/Footer";
 import NavBar from "@/components/shared/NavBar";
 import type { Metadata } from "next";
 // import Footer from "./components/shared/Footer";
@@ -19,7 +19,7 @@ export default function DashboardLayout({
     <div className="">
       <NavBar/>
       {children}
-      <Footer/>
+      {/* <Footer/> */}
     </div>
   );
 }

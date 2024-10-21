@@ -37,7 +37,7 @@ const userApi = baseApi.injectEndpoints({
         method: "PUT",
         body: formData,
       }),
-      invalidatesTags: ["User"],
+      invalidatesTags: ["User","Post"],
     }),
     updateFollowUnfollow: builder.mutation({
       query: (data) => ({

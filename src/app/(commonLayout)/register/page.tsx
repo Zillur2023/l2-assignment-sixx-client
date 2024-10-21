@@ -37,15 +37,12 @@ const RegisterPage: React.FC = () => {
   const [createUser] = useCreateUserMutation();
 
   const onSubmit: SubmitHandler<FormValues> = async (data) => {
-    console.log({data})
     const formData = new FormData();
 
       const imageFile = fileList[0].originFileObj as Blob;
-      // console.log({imageFile})
 
       formData.append("image", imageFile);
       formData.append("data", JSON.stringify(data))
-    console.log({ formData });
     const result = await createUser(formData).unwrap();
     if (result.success) {
       toast.success(result.message);

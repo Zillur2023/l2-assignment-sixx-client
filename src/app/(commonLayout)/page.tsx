@@ -1,9 +1,12 @@
-
+import CommonLayoutPage from "@/components/commonLayoutPage/CommonLayoutPage"
 
 
 const page = () => {
+
   return (
-    <div>RootPage</div>
+    <>
+     <CommonLayoutPage/>
+    </>
   )
 }
 

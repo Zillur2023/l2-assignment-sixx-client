@@ -47,8 +47,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
   const { data: postsData, refetch } = useGetAllPostQuery({postId});
-  console.log('commentModal postData',postId)
-  console.log('commentModal postData',postsData)
   const [deleteComment] = useDeleteCommentMutation()
   const { control, handleSubmit, reset, watch } = useForm();
   const [createComment] = useCreateCommentMutation();

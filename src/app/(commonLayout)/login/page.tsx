@@ -50,7 +50,6 @@ const LoginPage: React.FC = () => {
     if(res) {
      const { token } = res.data;
            const user:any = jwtDecode(token);
-           console.log('loginUser', user)
            dispatch(setUser({ user, token }));
           router.push("/")
      toast.success(res?.message, {id: toastId})
