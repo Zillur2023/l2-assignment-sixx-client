@@ -19,7 +19,7 @@ const ContactUs = () => {
       <div className="max-w-7xl mx-auto">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-bold text-gray-800">Contact Us</h1>
-          <p className="mt-4 text-gray-600">We'd love to hear from you! Whether you have questions, feedback, or just want to get in touch, fill out the form below and we'll get back to you soon.</p>
+          <p className="mt-4 text-gray-600">We would love to hear from you! Whether you have questions, feedback, or just want to get in touch, fill out the form below and we will get back to you soon.</p>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

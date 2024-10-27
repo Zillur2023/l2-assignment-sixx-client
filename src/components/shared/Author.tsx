@@ -1,9 +1,11 @@
+
 import { User } from "@nextui-org/react";
 import { VerifiedIcon } from "lucide-react";
+import { ReactNode } from "react";
 
 interface IAuthor {
-  name: string;
-  email: string;
+  name: string | ReactNode;
+  email: string | ReactNode;
   image: string;
   isVerified: boolean;
 }
@@ -14,6 +16,8 @@ interface AuthorProps {
 }
 
 export default function Author({ author, nameClass }: AuthorProps) {
+  console.log({author})
+  
   return (
     <User
       name={

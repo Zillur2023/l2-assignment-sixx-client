@@ -1,13 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
 import React, { useEffect, useRef, useState } from 'react';
 import { Table, Input, Button, Space, InputRef } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import Highlighter from 'react-highlight-words';
 import type { ColumnsType } from 'antd/es/table';
-import { IPost } from '@/components/type';
 import { useGetAllPostQuery } from '@/redux/features/post/postApi';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Author from '@/components/shared/Author';
+
+export interface IPost {
+  _id?: string;
+  author: {name:string,email:string,image: string, isVerified: boolean}; 
+  title: string;
+  category: string;
+  isPremium?: boolean; 
+  upvoteCount?: number; 
+  downvoteCount?: number; 
+  commentCount?: number;
+}
 
 const PostManagement: React.FC = () => {
   const { data: allPosts, refetch } = useGetAllPostQuery({});
@@ -84,9 +95,6 @@ const PostManagement: React.FC = () => {
     render: (text: any, record: IPost) => {
       if (dataIndex === 'author') {
         const isSearching = searchedColumn === 'author' && searchText;
-    
-        // Highlight styles
-        const highlightClass = 'font-medium bg-yellow-200'; // Example highlight class
     
         return (
           <Author

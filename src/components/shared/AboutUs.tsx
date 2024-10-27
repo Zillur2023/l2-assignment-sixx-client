@@ -28,7 +28,7 @@ const AboutUs = () => {
             <h2 className="text-3xl font-semibold text-gray-800 mb-4">Our Mission</h2>
             <p className="text-gray-600 mb-4">
               Our mission is to empower travelers with the best tips, stories, and recommendations to make their trips more enjoyable and memorable.
-              Whether you're a seasoned traveler or planning your first adventure, our platform offers valuable insights from fellow travelers around the world.
+              Whether you are a seasoned traveler or planning your first adventure, our platform offers valuable insights from fellow travelers around the world.
             </p>
             <h2 className="text-3xl font-semibold text-gray-800 mb-4">Why Choose Us?</h2>
             <ul className="list-disc pl-5 text-gray-600">

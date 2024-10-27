@@ -1,12 +1,14 @@
-'use client';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+'use client'
 import React, { useEffect, useRef, useState } from 'react';
-import { Table, Image, Tag, Input, Button, Space, InputRef } from 'antd';
+import { Table, Tag, Input, Button, Space, InputRef } from 'antd';
 import { SearchOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
 import type { FilterDropdownProps } from 'antd/es/table/interface';
 import Highlighter from 'react-highlight-words';
 import { IUser } from '@/components/type';
 import { useGetAllUserQuery } from '@/redux/features/user/userApi';
+import Author from '@/components/shared/Author';
 
 const UserManagement: React.FC = () => {
   const { data: allUser, refetch } = useGetAllUserQuery('');
@@ -15,16 +17,18 @@ const UserManagement: React.FC = () => {
   const [searchedColumn, setSearchedColumn] = useState('');
   const searchInput = useRef<InputRef>(null);
 
+  // Update users state when allUser data changes
   useEffect(() => {
     if (allUser?.data) {
-      setUsers(allUser?.data);
+      setUsers(allUser.data);
     }
   }, [allUser?.data, refetch]);
 
+  // Handle the search functionality
   const handleSearch = (
     selectedKeys: string[],
     confirm: FilterDropdownProps['confirm'],
-    dataIndex: keyof IUser,
+    dataIndex: 'name' | 'email',
   ) => {
     confirm();
     setSearchText(selectedKeys[0]);
@@ -36,21 +40,22 @@ const UserManagement: React.FC = () => {
     setSearchText('');
   };
 
-  const getColumnSearchProps = (dataIndex: keyof IUser): any => ({
-    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters, close }: FilterDropdownProps) => (
+  // Search properties for "User" column (both name and email)
+  const getColumnSearchProps = (): any => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm, clearFilters }: FilterDropdownProps) => (
       <div style={{ padding: 8 }} onKeyDown={(e) => e.stopPropagation()}>
         <Input
           ref={searchInput}
-          placeholder={`Search ${dataIndex}`}
+          placeholder="Search user (name or email)"
           value={selectedKeys[0]}
           onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
-          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+          onPressEnter={() => handleSearch(selectedKeys as string[], confirm, 'name')}
           style={{ marginBottom: 8, display: 'block' }}
         />
         <Space>
           <Button
             type="primary"
-            onClick={() => handleSearch(selectedKeys as string[], confirm, dataIndex)}
+            onClick={() => handleSearch(selectedKeys as string[], confirm, 'name')}
             icon={<SearchOutlined />}
             size="small"
             style={{ width: 90 }}
@@ -64,106 +69,81 @@ const UserManagement: React.FC = () => {
           >
             Reset
           </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              confirm({ closeDropdown: false });
-              setSearchText((selectedKeys as string[])[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            Filter
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
-              close();
-            }}
-          >
-            Close
-          </Button>
         </Space>
       </div>
     ),
     filterIcon: (filtered: boolean) => (
       <SearchOutlined style={{ color: filtered ? '#1677ff' : undefined }} />
     ),
-    onFilter: (value: string | boolean, record: IUser) => {
-      // Safely access record[dataIndex]
-      const recordValue = record[dataIndex];
-      return recordValue
-        ? recordValue.toString().toLowerCase().includes((value as string).toLowerCase())
-        : false; // Return false if recordValue is undefined
+    onFilter: (value: string, record: IUser) => {
+      const fullNameEmail = `${record.name} ${record.email}`.toLowerCase();
+      return fullNameEmail.includes(value.toLowerCase());
     },
     onFilterDropdownOpenChange: (visible: boolean) => {
       if (visible) {
         setTimeout(() => searchInput.current?.select(), 100);
       }
     },
-    render: (text: string | boolean | undefined) =>
-      searchedColumn === dataIndex ? (
-        <Highlighter
-          highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
-          searchWords={[searchText]}
-          autoEscape
-          textToHighlight={text ? text.toString() : ''}
+    render: (text: string | undefined, record: IUser) => {
+      const isSearching = searchedColumn === 'name' || searchedColumn === 'email';
+
+      return (
+        <Author
+          author={{
+            ...record,
+            name: isSearching ? (
+              <Highlighter
+                highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={record.name || ''}
+              />
+            ) : (
+              record.name
+            ),
+            email: isSearching ? (
+              <Highlighter
+                highlightStyle={{ backgroundColor: '#ffc069', padding: 0 }}
+                searchWords={[searchText]}
+                autoEscape
+                textToHighlight={record.email || ''}
+              />
+            ) : (
+              record.email
+            ),
+          }}
+          nameClass={'font-medium'} // Pass the highlight class if necessary
         />
-      ) : (
-        text
-      ),
+      );
+    },
   });
 
-  // Define columns for the Ant Design Table
+  // Define columns for the table
   const columns: ColumnsType<IUser> = [
     {
-      title: 'Image',
-      dataIndex: 'image',
-      key: 'image',
-      render: (image: string | undefined) => (
-        <Image
-          width={50}
-          src={image || 'https://via.placeholder.com/50'} // Fallback if no image
-          alt="User Profile"
-          className="rounded-md" 
-        />
-      ),
-    },
-    {
-      title: 'Name',
-      dataIndex: 'name',
-      key: 'name',
-      ...getColumnSearchProps('name'),
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-      ...getColumnSearchProps('email'),
+      title: 'User',
+      key: 'user',
+      ...getColumnSearchProps(), // Apply search for both name and email
     },
     {
       title: 'Followers',
       dataIndex: 'followers',
       key: 'followers',
-      sorter: (a, b) => a.followers - b.followers, // Add sorting
+      sorter: (a, b) => a.followers - b.followers,
     },
     {
       title: 'Following',
       dataIndex: 'following',
       key: 'following',
-      sorter: (a, b) => a.following - b.following, // Add sorting
+      sorter: (a, b) => a.following - b.following,
     },
     {
       title: 'Verified',
       dataIndex: 'isVerified',
       key: 'isVerified',
-      render: (isVerified: boolean) =>
-        isVerified ? (
-          <Tag color="green">Verified</Tag>
-        ) : (
-          <Tag color="red">Not Verified</Tag>
-        ),
+      render: (isVerified: boolean) => (
+        isVerified ? <Tag color="green">Verified</Tag> : <Tag color="red">Not Verified</Tag>
+      ),
       filters: [
         { text: 'Verified', value: true },
         { text: 'Not Verified', value: false },
@@ -174,12 +154,9 @@ const UserManagement: React.FC = () => {
       title: 'Role',
       dataIndex: 'role',
       key: 'role',
-      render: (role: 'admin' | 'user') =>
-        role === 'admin' ? (
-          <Tag color="blue">Admin</Tag>
-        ) : (
-          <Tag color="gold">User</Tag>
-        ),
+      render: (role: 'admin' | 'user') => (
+        role === 'admin' ? <Tag color="blue">Admin</Tag> : <Tag color="gold">User</Tag>
+      ),
       filters: [
         { text: 'Admin', value: 'admin' },
         { text: 'User', value: 'user' },
@@ -190,24 +167,27 @@ const UserManagement: React.FC = () => {
       title: 'Payment Status',
       dataIndex: 'paymentStatus',
       key: 'paymentStatus',
-      render: (status: string | undefined) => {
-        switch (status) {
-          case 'Paid':
-            return <Tag color="green">Paid</Tag>;
-          case 'Pending':
-            return <Tag color="orange">Pending</Tag>;
-          case 'Failed':
-            return <Tag color="red">Failed</Tag>;
-          default:
-            return <Tag color="default">N/A</Tag>;
-        }
-      },
+      render: (paymentStatus: 'Pending' | 'Paid' | 'Failed') => (
+        <Tag color={paymentStatus === 'Paid' ? 'green' : paymentStatus === 'Pending' ? 'orange' : 'red'}>
+          {paymentStatus}
+        </Tag>
+      ),
       filters: [
-        { text: 'Paid', value: 'Paid' },
         { text: 'Pending', value: 'Pending' },
+        { text: 'Paid', value: 'Paid' },
         { text: 'Failed', value: 'Failed' },
       ],
       onFilter: (value, record) => record.paymentStatus === value,
+    },
+    {
+      title: 'Transaction ID',
+      dataIndex: 'transactionId',
+      key: 'transactionId',
+      render: (transactionId: string) => (
+        <span style={{ color: transactionId ? 'blue' : 'grey' }}>
+          {transactionId || 'N/A'}
+        </span>
+      ),
     },
   ];
 

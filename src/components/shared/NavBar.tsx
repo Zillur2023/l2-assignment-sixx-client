@@ -42,6 +42,8 @@ export const userRoutes = [
 
 export const publicRoutes = [
   {href: "/", label: "News Feed" },
+  { href: "/about-us", label: "About us" },
+  { href: "/contact-us", label: "Contact us" },
   { href: "/register", label: "Register" },
   {href: "/login", label: "Login" },
 ];

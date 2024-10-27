@@ -8,15 +8,15 @@ export const postApi = baseApi.injectEndpoints({
         method: "POST",
         body: postData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post","User"],
     }),
     getAllPost: builder.query({
       query: ({
         postId,
         userId,
-        searchTerm, // Include searchTerm from parameters
-        category,   // Include category from parameters
-        sortBy,     // Include sortBy from parameters
+        searchTerm, 
+        category,   
+        sortBy,     
       }: {
         postId?: string;
         userId?: string;
@@ -67,7 +67,7 @@ export const postApi = baseApi.injectEndpoints({
         method: "PUT",
         body: postData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post","User"],
     }),
     updateDownvote: builder.mutation({
       query: (postData) => ({
@@ -75,7 +75,7 @@ export const postApi = baseApi.injectEndpoints({
         method: "PUT",
         body: postData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post","User"],
     }),
     updatePost: builder.mutation({
       query: (postData) => ({
@@ -83,14 +83,14 @@ export const postApi = baseApi.injectEndpoints({
         method: "PUT",
         body: postData,
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post","User"],
     }),
     deletePost: builder.mutation({
       query: (postId) => ({
         url: `/post/delete/${postId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Post"],
+      invalidatesTags: ["Post","User"],
     }),
     isAvailableForVeried: builder.query({
       query: (id) => ({

@@ -9,44 +9,37 @@ import {
   ModalFooter,
   Input,
   Button,
-  User,
-  Link,
   Tooltip,
   Spinner
 } from '@nextui-org/react';
 import { Controller, useForm } from 'react-hook-form';
 import { Avatar } from '@nextui-org/react';
-// import { useAppSelector } from '../../../redux/hooks';
-// import { RootState } from '../../../redux/store';
-// import { useGetUserQuery } from '../../../redux/features/user/userApi';
-// import { useCreateCommentMutation, useGetAllCommentQuery } from '../../../redux/features/comment/commentApi';
-// import { useGetAllPostQuery } from '../../../redux/features/post/postApi';
+
 
 import CommentPost from './CommentPost';
-import { Trash2, VerifiedIcon, X } from 'lucide-react'; // Import the X icon for the close button
+import { Trash2, X } from 'lucide-react'; // Import the X icon for the close button
 import { useAppSelector } from '@/redux/hooks';
 import { useGetUserQuery } from '@/redux/features/user/userApi';
 import { useGetAllPostQuery } from '@/redux/features/post/postApi';
 import { useCreateCommentMutation, useDeleteCommentMutation, useGetAllCommentQuery } from '@/redux/features/comment/commentApi';
 import { RootState } from '@/redux/store';
 import { toast } from 'sonner';
+import Author from '../shared/Author';
 
 interface CommentModalProps {
   postId: string;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
-  postsRefetch: () => void; // New prop to trigger post data refetch
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
   postId,
   isOpen,
   onOpenChange,
-  postsRefetch
 }) => {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
-  const { data: postsData, refetch } = useGetAllPostQuery({postId});
+  const { data: postsData } = useGetAllPostQuery({postId});
   const [deleteComment] = useDeleteCommentMutation()
   const { control, handleSubmit, reset, watch } = useForm();
   const [createComment] = useCreateCommentMutation();
@@ -67,8 +60,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
     try {
       await createComment(updatedData).unwrap();
       reset();
-      refetch(); // Refetch the posts
-      postsRefetch();
     } catch (error:any) {
       toast.error(error?.data?.message); // Show error if submission fails
     } finally {
@@ -82,8 +73,6 @@ const CommentModal: React.FC<CommentModalProps> = ({
       const res = await deleteComment(commentId).unwrap()
 
     if(res) {
-      refetch(); // Refetch the posts
-      postsRefetch();
       toast.success(res?.message, {id: toastId})
     }
     } catch (error:any) {
@@ -101,22 +90,7 @@ const CommentModal: React.FC<CommentModalProps> = ({
     
           <ModalHeader className="sticky top-0 bg-white z-10 p-4 shadow-md">
           <div className="flex items-center space-x-3">
-          <User
-              name={
-                <span className="flex items-center gap-3 text-lg font-semibold">
-                  {postsData?.data?.[0]?.author?.name}{" "}
-                  {postsData?.data?.[0]?.author?.isVerified && <VerifiedIcon className="w-5 h-5 text-blue-500 " />}
-                </span>
-              }
-              description={
-                <Link href="" size="sm" isExternal>
-                  {postsData?.data?.[0]?.author?.email}
-                </Link>
-              }
-              avatarProps={{
-                src: `${postsData?.data?.[0]?.author?.image}`,
-              }}
-            />
+          <Author author={postsData?.data?.[0]?.author} nameClass="text-lg font-semibold" />
           </div>
             {/* Close Icon */}
             <div

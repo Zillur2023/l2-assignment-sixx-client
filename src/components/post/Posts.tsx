@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Modal } from "antd";
 import { useRouter } from "next/navigation";
 import { allCategoryName } from "./constant";
+import Author from "../shared/Author";
 
 const Posts = () => {
   const router = useRouter()
@@ -23,9 +24,7 @@ const Posts = () => {
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [category, setCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"highestUpvotes" | "lowestUpvotes" | "highestDownvotes" | "lowestDownvotes">("highestUpvotes");
-  const { data: IsAvailableForVerified, refetch: IsAvailableForVerifiedRefetch } = useIsAvailableForVeriedQuery(userData?.data?._id, { skip: !userData?.data?._id });
-  const { data: postsData, refetch: postsDataRefetch } = useGetAllPostQuery({searchTerm, category: category || undefined, sortBy});
-  console.log({postsData})
+  const { data: postsData } = useGetAllPostQuery({searchTerm, category: category || undefined, sortBy});
   const [updateUpvote] = useUpdateUpvoteMutation();
   const [updateDownvote] = useUpdateDownvoteMutation();
   const [updateFollowUnfollow] = useUpdateFollowUnfollowMutation();
@@ -47,7 +46,6 @@ const Posts = () => {
     const postData = { userId: userData?.data?._id, postId };
     try {
       await updateUpvote(postData).unwrap();
-      IsAvailableForVerifiedRefetch();
     }catch(error:any) {
       if(error) {
         toast.error(error?.data?.message)
@@ -116,14 +114,9 @@ const Posts = () => {
       router.push("/login");
       return; // Prevent further execution
     }
-    postsDataRefetch();
     setPostIdForComment(postId);
     onOpen();
   };
-
-  useEffect(() => {
-    postsDataRefetch();
-  }, [postsDataRefetch,category, searchTerm, sortBy]);
 
   return (
     <div className="mt-6 space-y-6 max-w-full sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px] mx-auto">
@@ -160,22 +153,7 @@ const Posts = () => {
         <div key={post._id} className="bg-white shadow-lg rounded-lg p-6">
           {/* Author Info */}
           <div className="flex items-center justify-between mb-4">
-            <User
-              name={
-                <span className="flex items-center gap-3 text-lg font-semibold">
-                  {post?.author?.name}{" "}
-                  {post?.author?.isVerified && <VerifiedIcon className="w-5 h-5 text-blue-500 " />}
-                </span>
-              }
-              description={
-                <Link href="" size="sm" isExternal>
-                  {post?.author?.email}
-                </Link>
-              }
-              avatarProps={{
-                src: `${post?.author?.image}`,
-              }}
-            />
+          <Author author={post?.author} nameClass="text-lg font-semibold" />
             <div className="flex items-center gap-3">
               {post?.author?._id !== userData?.data?._id && (
                 <Button
@@ -277,7 +255,6 @@ const Posts = () => {
           postId={postIdForComment}
           isOpen={isOpen}
           onOpenChange={onOpenChange}
-          postsRefetch={postsDataRefetch}
         />
       )}  
 </div>

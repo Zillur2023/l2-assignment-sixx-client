@@ -4,7 +4,7 @@ export interface IUser {
     _id?: string;
     name: string;
     email: string;
-    image?: string;
+    image: string;
     followers: number; // Array of ObjectIds referencing 'User'
     following: number; // Array of ObjectIds referencing 'User'
     isVerified: boolean;
