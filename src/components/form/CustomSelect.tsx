@@ -1,6 +1,8 @@
-import { IInput } from "@/type";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// import { IInput } from "@/type";
 import { Select, SelectItem } from "@nextui-org/select";
 import { useFormContext } from "react-hook-form";
+import { IInput } from "../type";
 
 // import { IInput } from "@/src/types";
 

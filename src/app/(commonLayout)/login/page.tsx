@@ -13,7 +13,7 @@ import CustomForm from "@/components/form/CustomForm";
 import CustomInput from "@/components/form/CustomInput";
 import { Button } from "@nextui-org/react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import loginValidationSchema from "@/schemas/login.schema";
+import loginValidationSchema from "@/schemas/login.schema"; 
 
 
 const LoginPage: React.FC = () => {
