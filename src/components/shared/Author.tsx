@@ -12,11 +12,10 @@ interface IAuthor {
 
 interface AuthorProps {
   author: IAuthor;
-  nameClass: string; // Optional class for the author's name
+  nameClass?: string; // Optional class for the author's name
 }
 
 export default function Author({ author, nameClass }: AuthorProps) {
-  console.log({author})
   
   return (
     <User
