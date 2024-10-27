@@ -10,13 +10,14 @@ import {
   useGetUserQuery,
   useUpdateVerifiedMutation,
 } from "@/redux/features/user/userApi";
-import CreatePost from "@/components/post/CreatePost";
+
 import UpdateProfile from "@/components/profile/UpdateProfile";
 import { VerifiedIcon } from "lucide-react";
 import { Button } from "@nextui-org/react";
 import { toast } from "sonner";
 import { useIsAvailableForVeriedQuery } from "@/redux/features/post/postApi";
 import { useEffect } from "react";
+import PostUpdate from "@/components/post/PostUpdate";
 
 const Sidebar = () => {
   // const { user } = useUser();
@@ -115,7 +116,7 @@ const Sidebar = () => {
 
         {/* Create Post */}
         <div className="my-3">
-          <CreatePost />
+          <PostUpdate />
         </div>
 
         {/* Update Profile */}

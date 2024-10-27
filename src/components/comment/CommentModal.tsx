@@ -1,69 +1,56 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 'use client'
-import React, { useState } from 'react';
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalBody,
-  ModalFooter,
-  Input,
-  Button,
-  Tooltip,
-  Spinner
-} from '@nextui-org/react';
-import { Controller, useForm } from 'react-hook-form';
+import React, { ReactNode, useState } from 'react';
+import { Button,Spinner,Tooltip } from '@nextui-org/react';
+import {  FieldValues, FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { Avatar } from '@nextui-org/react';
-
-
-import CommentPost from './CommentPost';
-import { Trash2, X } from 'lucide-react'; // Import the X icon for the close button
+import {  Trash2 } from 'lucide-react'; // Import the X icon for the close button
 import { useAppSelector } from '@/redux/hooks';
 import { useGetUserQuery } from '@/redux/features/user/userApi';
-import { useGetAllPostQuery } from '@/redux/features/post/postApi';
 import { useCreateCommentMutation, useDeleteCommentMutation, useGetAllCommentQuery } from '@/redux/features/comment/commentApi';
 import { RootState } from '@/redux/store';
 import { toast } from 'sonner';
-import Author from '../shared/Author';
+import CustomModal from '../modal/CustomModal';
+import CustomInput from '../form/CustomInput';
+import Posts from '../post/Posts';
+// import LoadingButton from '../shared/LoadingButton';
 
 interface CommentModalProps {
   postId: string;
-  isOpen: boolean;
-  onOpenChange: (isOpen: boolean) => void;
+  openButton: ReactNode
 }
 
 const CommentModal: React.FC<CommentModalProps> = ({
   postId,
-  isOpen,
-  onOpenChange,
+  openButton
 }) => {
   const { user } = useAppSelector((state: RootState) => state.auth);
   const { data: userData } = useGetUserQuery(user?.email, { skip: !user?.email });
-  const { data: postsData } = useGetAllPostQuery({postId});
   const [deleteComment] = useDeleteCommentMutation()
-  const { control, handleSubmit, reset, watch } = useForm();
   const [createComment] = useCreateCommentMutation();
   const { data: allCommentData } = useGetAllCommentQuery(postId);
-  const [commentLoading, setCommentLoading] = useState(false); // Loading state for the comment button
+  const [commentLoading, setCommentLoading] = useState(false)
 
+  const methods = useForm();
 
+  const { handleSubmit, reset, watch } = methods;
 
   const commentText = watch('commentText'); // Watch the comment input field
 
-  const onSubmit = async (data: any) => {
-    setCommentLoading(true); // Set loading to true when submission starts
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     const updatedData = {
       ...data,
       userId: userData?.data?._id,
       postId,
     };
     try {
+      setCommentLoading(true)
       await createComment(updatedData).unwrap();
       reset();
     } catch (error:any) {
-      toast.error(error?.data?.message); // Show error if submission fails
+      toast.error(error?.data?.message);
     } finally {
-      setCommentLoading(false); // Set loading to false after submission completes
+      setCommentLoading(false)
     }
   };
 
@@ -81,34 +68,17 @@ const CommentModal: React.FC<CommentModalProps> = ({
   }
 
   return (
-    <Modal
-      isOpen={isOpen}
-      onOpenChange={onOpenChange}
-      className="flex flex-col justify-between h-full relative" // Added relative position to modal
+    <CustomModal
+    // title={<Author author={postsData?.data?.[0]?.author} nameClass="text-lg font-semibold" />}
+    title=""
+    openButton={openButton}
+    // onUpdate={handleSubmit(onSubmit)}
+    footerButton={false}
     >
-      <ModalContent>
-    
-          <ModalHeader className="sticky top-0 bg-white z-10 p-4 shadow-md">
-          <div className="flex items-center space-x-3">
-          <Author author={postsData?.data?.[0]?.author} nameClass="text-lg font-semibold" />
+         <div className="flex-1 overflow-y-auto px-4">
+         <div className="mb-4">
+            <Posts postId={postId} commentModal={false} />
           </div>
-            {/* Close Icon */}
-            <div
-            className="absolute right-4 top-4 cursor-pointer z-20"
-            onClick={() => onOpenChange(false)} // Close the modal
-          >
-            <X size={24} />
-          </div>
-        </ModalHeader>
-
-        {/* Modal body for showing post and comments */}
-        <ModalBody className="flex-1 overflow-y-auto px-4">
-          {/* Post content */}
-          <div className="mb-4">
-            <CommentPost postsData={postsData} />
-          </div>
-
-          {/* Comments Section */}
           <div className="space-y-4">
             {allCommentData?.data?.map((comment:any) => (
               <div key={comment?._id} className="flex items-start space-x-2">
@@ -127,45 +97,34 @@ const CommentModal: React.FC<CommentModalProps> = ({
               </div>
             ))}
           </div>
-        </ModalBody>
-
-        {/* Sticky Footer with input to add comment */}
-        <ModalFooter className="sticky bottom-0 bg-white z-10 p-4 shadow-md">
-          <form
-            onSubmit={handleSubmit(onSubmit)}
-            className="flex items-center w-full space-x-2"
-          >
-            <Controller
-              name="commentText"
-              control={control}
-              defaultValue=""
-              render={({ field }) => (
-                <Input
-                  {...field}
-                  fullWidth
-                  placeholder="Write a comment..."
-                  onChange={(e) => field.onChange(e.target.value)}
-                />
-              )}
-            />
-            <Button
-              // auto
+          <FormProvider {...methods}>
+          <form onSubmit={handleSubmit(onSubmit)} className="flex items-center justify-center gap-2 my-3">
+          <div className=' w-full'><CustomInput label="Comment" name="commentText" size="sm" /></div>
+           <Button
               type="submit"
-              color={commentText ? 'secondary' : 'default'} // Use default color when disabled
-              className={!commentText ? 'bg-gray-300' : ''} // Apply custom styling when disabled
-              disabled={!commentText} // Disable if no comment text
+              color={commentText ? 'secondary' : 'default'} 
+              className={!commentText ? 'bg-gray-300' : ''} 
+              disabled={!commentText} 
             >
               {commentLoading ? (
                 <Spinner /> // Show spinner when loading
               ) : (
                 'Comment'
               )}
-            </Button>
-          </form>
-        </ModalFooter>
-     
-      </ModalContent>
-    </Modal>
+              
+             </Button>  
+            {/* <LoadingButton
+                  type='submit'
+                  buttonId="commentModal"
+                  // loading={isSubmitting}
+                >
+                  Comment
+                </LoadingButton> */}
+            
+            </form>
+            </FormProvider>
+         </div>
+    </CustomModal>
   );
 };
 
